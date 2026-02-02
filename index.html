@@ -13,11 +13,7 @@
         .camp-name { font-size: 2.2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
 
         /* CLOCK */
-        .clock-container {
-            text-align: center; background: #2c3e50; color: #fff; padding: 10px;
-            border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .time-display { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
         .date-display { font-size: 0.9rem; color: #bdc3c7; }
 
@@ -28,14 +24,14 @@
         .btn-mode.active-admin { background-color: #e74c3c; color: white; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); transform: scale(1.05); }
         .btn-mode:not(.active-guest):not(.active-admin):hover { background-color: rgba(255,255,255,0.5); }
 
-        /* FILTER & EXPORT PANEL */
+        /* FILTER & EXPORT */
         .filter-panel { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #d32f2f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
         .filter-label { font-weight: bold; color: #d32f2f; white-space: nowrap; }
         select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; outline: none; font-size: 1rem; min-width: 150px; }
-        
-        /* Button Xuất Excel */
         .btn-export { background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .btn-export:hover { background-color: #219150; }
+        
+        /* DATA UPLOAD BUTTON (Ẩn mặc định) */
+        .btn-upload { background-color: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
 
         /* STATS */
         .stats { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -44,7 +40,7 @@
         .stat-note { font-size: 0.8rem; font-weight: normal; color: #bdc3c7; display: block; margin-top: 2px;}
 
         /* TABLE */
-        .table-container { flex-grow: 1; } /* Đẩy footer xuống dưới */
+        .table-container { flex-grow: 1; }
         table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
         th { background-color: #d32f2f; color: white; text-transform: uppercase; font-size: 0.9rem; }
@@ -56,21 +52,12 @@
         .bg-absent { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
         .btn-toggle { background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-        .btn-toggle:hover { background-color: #e67e22; }
         .hidden { display: none; }
 
-        /* FOOTER COPYRIGHT */
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
+        /* FOOTER */
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 0.9rem; }
         .footer strong { color: #2c3e50; }
         .footer a { color: #d32f2f; text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -86,40 +73,36 @@
     </div>
 
     <div class="mode-container">
-        <button id="btnGuest" class="btn-mode active-guest" onclick="switchMode('guest')">👀 Chế độ Khách</button>
-        <button id="btnAdmin" class="btn-mode" onclick="switchMode('admin')">🛡️ Chế độ Quản lý</button>
+        <button id="btnGuest" class="btn-mode active-guest">👀 Chế độ Khách</button>
+        <button id="btnAdmin" class="btn-mode">🛡️ Chế độ Quản lý</button>
     </div>
 
     <div class="filter-panel">
-        <span class="filter-label">🔍 LỌC & TÌM KIẾM:</span>
-        <select id="filterClass" onchange="renderTable()">
-            <option value="all">-- Tất cả các lớp --</option>
+        <span class="filter-label">🔍 CÔNG CỤ:</span>
+        <select id="filterClass">
+            <option value="all">-- Đang tải dữ liệu... --</option>
         </select>
-        <select id="filterStatus" onchange="renderTable()">
+        <select id="filterStatus">
             <option value="all">-- Tất cả trạng thái --</option>
             <option value="present">Đang có mặt</option>
             <option value="absent">Đang vắng</option>
         </select>
-        <button class="btn-export" onclick="exportToExcel()">
-            📥 Xuất Excel
-        </button>
+        <button class="btn-export" id="btnExport">📥 Xuất Excel</button>
+        <button class="btn-upload" id="btnUploadData">⬆️ Nạp Dữ Liệu Gốc</button>
     </div>
 
     <div class="stats">
         <div class="stat-item">
-            <span>TỔNG SỐ</span>
-            <span class="stat-note">(Lớp đang chọn)</span>
-            <span id="statTotal" class="stat-number" style="color: #f1c40f;">0</span>
+            <span>TỔNG SỐ</span><span class="stat-note">(Lớp đang chọn)</span>
+            <span id="statTotal" class="stat-number" style="color: #f1c40f;">...</span>
         </div>
         <div class="stat-item">
-            <span>CÓ MẶT</span>
-            <span class="stat-note">(Thực tế)</span>
-            <span id="statPresent" class="stat-number" style="color: #2ecc71;">0</span>
+            <span>CÓ MẶT</span><span class="stat-note">(Thực tế)</span>
+            <span id="statPresent" class="stat-number" style="color: #2ecc71;">...</span>
         </div>
         <div class="stat-item">
-            <span>VẮNG</span>
-            <span class="stat-note">(Thực tế)</span>
-            <span id="statAbsent" class="stat-number" style="color: #ff6b6b;">0</span>
+            <span>VẮNG</span><span class="stat-note">(Thực tế)</span>
+            <span id="statAbsent" class="stat-number" style="color: #ff6b6b;">...</span>
         </div>
     </div>
 
@@ -134,7 +117,9 @@
                     <th style="width: 100px;" id="colAction" class="hidden">Thao tác</th>
                 </tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="tableBody">
+                <tr><td colspan="5" style="text-align:center; padding: 20px;">Đang kết nối đến máy chủ Firebase (hoitrai2026)...</td></tr>
+            </tbody>
         </table>
     </div>
 
@@ -143,8 +128,29 @@
         Email: <a href="mailto:tranhongdan@tranphudlk.edu.vn">tranhongdan@tranphudlk.edu.vn</a>
     </div>
 
-    <script>
-        // ================= DỮ LIỆU =================
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // ============================================================
+        // 1. CẤU HÌNH FIREBASE CỦA BẠN (Đã cập nhật)
+        // ============================================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyDEnDE2pOyfKZYUPCSXgaHaR2b9h_AjAe8",
+          authDomain: "hoitrai2026.firebaseapp.com",
+          databaseURL: "https://hoitrai2026-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "hoitrai2026",
+          storageBucket: "hoitrai2026.firebasestorage.app",
+          messagingSenderId: "648028043852",
+          appId: "1:648028043852:web:9d0b07f6823fcec5fa12e9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // ============================================================
+        // 2. DỮ LIỆU GỐC (Thay nội dung Excel của bạn vào đây)
+        // ============================================================
 let students = [
     { id: 1, name: "NGUYỄN TẤN HOÀNG ANH", class: "10A01", status: "present" },
     { id: 2, name: "NGUYỄN TUẤN ANH", class: "10A01", status: "present" },
@@ -1204,57 +1210,146 @@ let students = [
     { id: 1056, name: "CAO NHÃ VY", class: "12A09", status: "present" },
     { id: 1057, name: "H WĔ ÊBAN", class: "12A09", status: "present" },
     { id: 1058, name: "Y - YAKƠ NIÊ", class: "12A09", status: "present" }
-];        // ===========================================
+];
 
-        const SYSTEM_PASSWORD = "123";
+        // ============================================================
+        // 3. LOGIC XỬ LÝ
+        // ============================================================
+        let globalStudents = []; 
         let isAdmin = false;
+        const SYSTEM_PASSWORD = "123";
 
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('liveTime').textContent = now.toLocaleTimeString('vi-VN');
-            document.getElementById('liveDate').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        function switchMode(mode) {
-            const btnGuest = document.getElementById("btnGuest");
-            const btnAdmin = document.getElementById("btnAdmin");
-            const colAction = document.getElementById("colAction");
-
-            if (mode === 'guest') {
-                isAdmin = false;
-                btnGuest.classList.add("active-guest");
-                btnAdmin.classList.remove("active-admin");
-                colAction.classList.add("hidden");
+        // Lắng nghe dữ liệu
+        const starCountRef = ref(db, 'students');
+        onValue(starCountRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                globalStudents = Object.values(data); 
                 renderTable();
-            } else if (mode === 'admin') {
-                if (!isAdmin) {
-                    const pass = prompt("🔑 Nhập mật khẩu quản trị:");
-                    if (pass === SYSTEM_PASSWORD) {
-                        isAdmin = true;
-                        btnGuest.classList.remove("active-guest");
-                        btnAdmin.classList.add("active-admin");
-                        colAction.classList.remove("hidden");
-                        renderTable();
-                    } else if (pass !== null) alert("❌ Sai mật khẩu!");
-                }
+                initFilter();
+                document.getElementById('btnUploadData').style.display = 'none';
+            } else {
+                globalStudents = [];
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color: red;">Hệ thống chưa có dữ liệu! Vui lòng Đăng nhập quản lý để nạp dữ liệu.</td></tr>';
+                document.getElementById('statTotal').textContent = "0";
+                if(isAdmin) document.getElementById('btnUploadData').style.display = 'inline-block';
             }
+        });
+
+        window.toggleStatus = function(id) {
+            const student = globalStudents.find(s => s.id === id);
+            if (student) {
+                const newStatus = (student.status === 'present') ? 'absent' : 'present';
+                update(ref(db, 'students/' + id), { status: newStatus });
+            }
+        };
+
+        window.uploadInitialData = function() {
+            if(confirm("Bạn muốn nạp toàn bộ danh sách học sinh lên Firebase?")) {
+                const updates = {};
+                initialStudentsData.forEach(s => {
+                    updates['students/' + s.id] = s;
+                });
+                update(ref(db), updates)
+                .then(() => alert("Đã nạp dữ liệu thành công!"))
+                .catch((error) => alert("Lỗi kết nối Firebase: " + error));
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("tableBody");
+            const fClass = document.getElementById("filterClass").value;
+            const fStatus = document.getElementById("filterStatus").value;
+
+            tbody.innerHTML = "";
+            let statTotal = 0, statPresent = 0, statAbsent = 0;
+            let displayCount = 0;
+
+            const sortedStudents = [...globalStudents].sort((a, b) => a.class.localeCompare(b.class));
+
+            sortedStudents.forEach((s) => {
+                let isClassMatch = (fClass === 'all' || s.class === fClass);
+                if (isClassMatch) {
+                    statTotal++;
+                    s.status === 'present' ? statPresent++ : statAbsent++;
+                }
+
+                let isStatusMatch = (fStatus === 'all' || s.status === fStatus);
+                if (isClassMatch && isStatusMatch) {
+                    displayCount++;
+                    const badge = s.status === 'present' 
+                        ? `<span class="badge bg-present">CÓ MẶT</span>` 
+                        : `<span class="badge bg-absent">VẮNG</span>`;
+                    
+                    const actionBtn = `<button class="btn-toggle" onclick="toggleStatus(${s.id})">Đổi</button>`;
+                    
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${displayCount}</td>
+                        <td><strong>${s.class}</strong></td>
+                        <td>${s.name}</td>
+                        <td>${badge}</td>
+                        ${isAdmin ? `<td>${actionBtn}</td>` : `<td class="hidden"></td>`}
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            document.getElementById("statTotal").textContent = statTotal;
+            document.getElementById("statPresent").textContent = statPresent;
+            document.getElementById("statAbsent").textContent = statAbsent;
         }
 
         function initFilter() {
             const select = document.getElementById("filterClass");
-            const uniqueClasses = [...new Set(students.map(s => s.class))].sort();
-            uniqueClasses.forEach(c => {
-                const opt = document.createElement("option");
-                opt.value = c;
-                opt.textContent = c;
-                select.appendChild(opt);
-            });
+            const uniqueClasses = [...new Set(globalStudents.map(s => s.class))].sort();
+            
+            if (select.options.length <= 1 && uniqueClasses.length > 0) {
+                 select.innerHTML = '<option value="all">-- Tất cả các lớp --</option>';
+                 uniqueClasses.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c;
+                    opt.textContent = c;
+                    select.appendChild(opt);
+                });
+            }
         }
 
-        // === CHỨC NĂNG XUẤT EXCEL ===
-        function exportToExcel() {
+        // --- EVENTS ---
+        document.getElementById('btnGuest').addEventListener('click', () => { isAdmin = false; updateUIMode(); });
+        document.getElementById('btnAdmin').addEventListener('click', () => {
+            if (!isAdmin) {
+                const pass = prompt("🔑 Nhập mật khẩu quản trị:");
+                if (pass === SYSTEM_PASSWORD) { isAdmin = true; updateUIMode(); } 
+                else if (pass !== null) alert("❌ Sai mật khẩu!");
+            }
+        });
+
+        function updateUIMode() {
+            const btnGuest = document.getElementById("btnGuest");
+            const btnAdmin = document.getElementById("btnAdmin");
+            const colAction = document.getElementById("colAction");
+            const btnUpload = document.getElementById("btnUploadData");
+
+            if(isAdmin) {
+                btnGuest.classList.remove("active-guest");
+                btnAdmin.classList.add("active-admin");
+                colAction.classList.remove("hidden");
+                if(globalStudents.length === 0) btnUpload.style.display = 'inline-block';
+            } else {
+                btnGuest.classList.add("active-guest");
+                btnAdmin.classList.remove("active-admin");
+                colAction.classList.add("hidden");
+                btnUpload.style.display = 'none';
+            }
+            renderTable();
+        }
+
+        document.getElementById('filterClass').addEventListener('change', renderTable);
+        document.getElementById('filterStatus').addEventListener('change', renderTable);
+        document.getElementById('btnUploadData').addEventListener('click', window.uploadInitialData);
+        
+        document.getElementById('btnExport').addEventListener('click', () => {
             const now = new Date();
             const timeStr = now.toLocaleString('vi-VN');
             const fClass = document.getElementById("filterClass").value;
@@ -1278,30 +1373,19 @@ let students = [
                         </thead>
                         <tbody>
             `;
-
             let count = 0;
-            students.forEach(s => {
+            const sortedStudents = [...globalStudents].sort((a, b) => a.class.localeCompare(b.class));
+            sortedStudents.forEach(s => {
                 let isClassMatch = (fClass === 'all' || s.class === fClass);
                 let isStatusMatch = (fStatus === 'all' || s.status === fStatus);
-
                 if (isClassMatch && isStatusMatch) {
                     count++;
                     const statusText = s.status === 'present' ? 'Có mặt' : 'Vắng';
                     const color = s.status === 'present' ? 'green' : 'red';
-                    
-                    html += `
-                        <tr>
-                            <td style="text-align:center">${count}</td>
-                            <td style="text-align:center"><b>${s.class}</b></td>
-                            <td>${s.name}</td>
-                            <td style="color:${color}; font-weight:bold; text-align:center">${statusText}</td>
-                        </tr>
-                    `;
+                    html += `<tr><td style="text-align:center">${count}</td><td style="text-align:center"><b>${s.class}</b></td><td>${s.name}</td><td style="color:${color}; font-weight:bold; text-align:center">${statusText}</td></tr>`;
                 }
             });
-
             html += `</tbody></table><br><p style="text-align:right">Xác nhận của BTC</p></body></html>`;
-
             const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1310,60 +1394,15 @@ let students = [
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveTime').textContent = now.toLocaleTimeString('vi-VN');
+            document.getElementById('liveDate').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
-
-        function renderTable() {
-            const tbody = document.getElementById("tableBody");
-            tbody.innerHTML = "";
-            const fClass = document.getElementById("filterClass").value;
-            const fStatus = document.getElementById("filterStatus").value;
-
-            let statTotal = 0, statPresent = 0, statAbsent = 0;
-            let displayCount = 0;
-
-            students.forEach((s) => {
-                let isClassMatch = (fClass === 'all' || s.class === fClass);
-                if (isClassMatch) {
-                    statTotal++;
-                    if (s.status === 'present') statPresent++; else statAbsent++;
-                }
-
-                let isStatusMatch = (fStatus === 'all' || s.status === fStatus);
-                if (isClassMatch && isStatusMatch) {
-                    displayCount++;
-                    const tr = document.createElement("tr");
-                    const badge = s.status === 'present' 
-                        ? `<span class="badge bg-present">CÓ MẶT</span>` 
-                        : `<span class="badge bg-absent">VẮNG</span>`;
-                    
-                    const actionBtn = `<button class="btn-toggle" onclick="toggleStatus(${s.id})">Đổi</button>`;
-                    
-                    tr.innerHTML = `
-                        <td>${displayCount}</td>
-                        <td><strong>${s.class}</strong></td>
-                        <td>${s.name}</td>
-                        <td>${badge}</td>
-                        ${isAdmin ? `<td>${actionBtn}</td>` : `<td class="hidden"></td>`}
-                    `;
-                    tbody.appendChild(tr);
-                }
-            });
-
-            document.getElementById("statTotal").textContent = statTotal;
-            document.getElementById("statPresent").textContent = statPresent;
-            document.getElementById("statAbsent").textContent = statAbsent;
-        }
-
-        function toggleStatus(id) {
-            const s = students.find(x => x.id === id);
-            if(s) {
-                s.status = (s.status === 'present' ? 'absent' : 'present');
-                renderTable();
-            }
-        }
-
-        initFilter();
-        renderTable();
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
