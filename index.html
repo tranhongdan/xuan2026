@@ -10,27 +10,18 @@
         .school-header { text-align: center; margin-bottom: 20px; text-transform: uppercase; }
         .school-name { font-size: 1.2rem; color: #555; font-weight: bold; letter-spacing: 1px; margin: 0; }
         .camp-name { font-size: 2.2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-
-        /* CLOCK & MODE */
         .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
         .time-display { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
         .mode-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; background: #e0e0e0; padding: 5px; border-radius: 30px; width: fit-content; margin-left: auto; margin-right: auto; }
         .btn-mode { padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; color: #555; background: transparent; }
         .btn-mode.active-guest { background-color: #3498db; color: white; }
         .btn-mode.active-admin { background-color: #e74c3c; color: white; }
-
-        /* ADMIN PANEL */
         #adminPanel { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #e74c3c; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .admin-grid { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        
-        /* FILTER PANEL */
         .filter-panel { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #d32f2f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
         select, input[type="text"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
-        
         .btn-export { background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-toggle { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-
-        /* STATS & TABLE */
         .stats { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .stat-number { font-size: 1.4rem; display: block; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
@@ -39,13 +30,9 @@
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; width: 80px; display: inline-block; text-align: center; }
         .bg-present { background-color: #d1fae5; color: #065f46; }
         .bg-absent { background-color: #fee2e2; color: #991b1b; }
-        
         .hidden { display: none; }
-        
-        /* TOAST */
-        .toast-msg { position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 15px 25px; border-radius: 8px; z-index: 10000; font-weight: bold; animation: slideIn 0.5s; }
+        .toast-msg { position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 15px 25px; border-radius: 8px; z-index: 10000; font-weight: bold; animation: slideIn 0.5s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
         .footer { margin-top: 40px; text-align: center; color: #7f8c8d; font-size: 0.9rem; padding-bottom: 20px;}
     </style>
 </head>
@@ -82,7 +69,6 @@
             <span id="currentLoginInfo" style="font-weight: bold; color: #d32f2f;"></span>
             <input type="text" id="changePassInput" placeholder="Mã xxxx mới">
             <button class="btn-toggle" style="background:#27ae60" onclick="changeMyPass()">Đổi mã số</button>
-            <button class="btn-toggle" style="background:#7f8c8d" id="btnUploadData">⬆️ Nạp gốc</button>
         </div>
     </div>
 
@@ -144,7 +130,7 @@
         let isAdmin = false;
         let currentUser = null;
 
-        // --- UTILS ---
+        // --- HÀM TIỆN ÍCH ---
         function removeVietnameseTones(str) {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
         }
@@ -158,7 +144,7 @@
             document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
         }
 
-        // --- FIREBASE DATA ---
+        // --- DỮ LIỆU FIREBASE ---
         onValue(ref(db, 'students'), (snap) => {
             const data = snap.val();
             globalStudents = data ? Object.values(data) : [];
@@ -166,10 +152,10 @@
             renderTable();
         });
 
-        // --- AUTH LOGIC ---
+        // --- ĐĂNG NHẬP ---
         document.getElementById('btnAdmin').addEventListener('click', () => {
             if (isAdmin) return;
-            const pass = prompt("🔑 Nhập mật khẩu (Lớp+xxxx hoặc cong+xxxx):");
+            const pass = prompt("🔑 Mật khẩu (Lớp+xxxx hoặc cong+xxxx):");
             if (!pass) return;
 
             if (pass === SYSTEM_PASSWORD) {
@@ -180,8 +166,9 @@
             onValue(ref(db, 'accounts'), (snap) => {
                 const accs = snap.val();
                 let found = false;
+                const lowPass = pass.toLowerCase();
                 for (let id in accs) {
-                    if (accs[id].password === pass) {
+                    if (accs[id].password.toLowerCase() === lowPass) {
                         isAdmin = true; currentUser = accs[id]; found = true; break;
                     }
                 }
@@ -213,29 +200,33 @@
             renderTable();
         }
 
-        // --- ACCOUNT MANAGEMENT ---
+        // --- QUẢN LÝ ACC ---
         window.createAccount = function() {
             const user = document.getElementById('newAccUser').value.trim();
             const pin = document.getElementById('newAccPass').value.trim();
             if (!user || !pin) return;
+            
+            // Xử lý Target luôn viết hoa nếu là lớp
             const type = user.toLowerCase().startsWith('cong') ? 'gate' : 'class';
-            const acc = { id: user, password: user + pin, type: type, target: type === 'class' ? user : 'all' };
+            const finalTarget = type === 'class' ? user.toUpperCase() : 'all';
+            
+            const acc = { id: user, password: user + pin, type: type, target: finalTarget };
             update(ref(db, 'accounts/' + user), acc).then(() => showToast("Đã tạo " + user));
         };
 
         window.changeMyPass = function() {
             const pin = document.getElementById('changePassInput').value.trim();
-            if (pin.length < 4 || !currentUser || currentUser.id === 'admin') return alert("Không khả dụng");
+            if (pin.length < 4 || !currentUser || currentUser.id === 'admin') return alert("Không hợp lệ");
             const newP = currentUser.id + pin;
             update(ref(db, 'accounts/' + currentUser.id), { password: newP }).then(() => {
-                showToast("Đã đổi mã số thành công!");
+                showToast("Đổi mã thành công!");
                 currentUser.password = newP;
             });
         };
 
-        // --- EXCEL LOGIC ---
+        // --- EXCEL ---
         window.downloadSampleExcel = function() {
-            const data = [["ID_TaiKhoan", "Ma_PIN"], ["10A01", "1234"], ["cong01", "0000"]];
+            const data = [["ID_TaiKhoan", "Ma_PIN"], ["10a01", "1234"], ["cong01", "0000"]];
             const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Mau"); XLSX.writeFile(wb, "Mau_Tai_Khoan.xlsx");
         };
@@ -247,32 +238,44 @@
                 const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 const updates = {}; let count = 0;
+                
                 json.forEach(row => {
-                    const u = String(row.ID_TaiKhoan || "").trim(); const p = String(row.Ma_PIN || "").trim();
+                    const u = String(row.ID_TaiKhoan || "").trim(); 
+                    const p = String(row.Ma_PIN || "").trim();
                     if (u && p) {
-                        const t = u.toLowerCase().startsWith('cong') ? 'gate' : 'class';
-                        updates['accounts/' + u] = { id: u, password: u + p, type: t, target: t === 'class' ? u : 'all' };
+                        const type = u.toLowerCase().startsWith('cong') ? 'gate' : 'class';
+                        // Sửa lỗi: Nếu là lớp, target phải VIẾT HOA để khớp với dữ liệu học sinh
+                        const target = type === 'class' ? u.toUpperCase() : 'all';
+                        
+                        updates['accounts/' + u] = { 
+                            id: u, 
+                            password: u + p, 
+                            type: type, 
+                            target: target 
+                        };
                         count++;
                     }
                 });
-                update(ref(db), updates).then(() => {
-                    showToast("Đã import acc thành công!");
-                    setTimeout(() => location.reload(), 1500);
-                });
+                if(count > 0) {
+                    update(ref(db), updates).then(() => {
+                        showToast(`Đã import ${count} acc thành công!`);
+                        setTimeout(() => location.reload(), 1500);
+                    });
+                } else { alert("Không tìm thấy dữ liệu hợp lệ!"); }
             };
             reader.readAsArrayBuffer(file);
         };
 
-        // --- MAIN RENDER ---
+        // --- HIỂN THỊ BẢNG ---
         function renderTable() {
             const tbody = document.getElementById("tableBody");
             const fSearch = removeVietnameseTones(document.getElementById("searchInput").value);
             let fClass = document.getElementById("filterClass").value;
             const fStatus = document.getElementById("filterStatus").value;
 
-            // Quyền hạn lớp
+            // Ràng buộc lớp dựa trên tài khoản
             if (isAdmin && currentUser.type === 'class') {
-                fClass = currentUser.target;
+                fClass = currentUser.target; // Luôn là chữ hoa nhờ xử lý lúc tạo acc
                 document.getElementById("filterClass").value = fClass;
                 document.getElementById("filterClass").disabled = true;
             } else {
@@ -284,12 +287,12 @@
 
             const sorted = [...globalStudents].sort((a,b) => a.class.localeCompare(b.class));
             sorted.forEach(s => {
-                const matchClass = (fClass === 'all' || s.class === fClass);
+                const matchClass = (fClass === 'all' || s.class.toUpperCase() === fClass.toUpperCase());
                 const matchStatus = (fStatus === 'all' || s.status === fStatus);
                 const matchSearch = !fSearch || removeVietnameseTones(s.name).includes(fSearch) || getInitials(s.name).includes(fSearch);
 
                 if (matchClass && matchStatus && matchSearch) {
-                    sTotal++; s[s.status === 'present' ? 'p' : 'a'] = 1; // dummy
+                    sTotal++;
                     s.status === 'present' ? sPresent++ : sAbsent++;
 
                     const tr = document.createElement("tr");
