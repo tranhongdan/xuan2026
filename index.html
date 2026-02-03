@@ -105,6 +105,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDEnDE2pOyfKZYUPCSXgaHaR2b9h_AjAe8",
             authDomain: "hoitrai2026.firebaseapp.com",
@@ -124,7 +125,7 @@
         let myClass = "";
         let impType = "";
 
-        // 1. Lay du lieu tu Firebase
+        // Lay du lieu
         onValue(ref(db, 'students'), (snap) => {
             students = snap.val() ? Object.values(snap.val()) : [];
             updateFilterClass();
@@ -135,7 +136,7 @@
             accounts = snap.val() || {};
         });
 
-        // 2. Logic Dang nhap theo yeu cau moi
+        // XU LY DANG NHAP
         document.getElementById('btnAdmin').addEventListener('click', () => {
             if (role === "guest") {
                 const pass = prompt("Nhap mat khau (Vd: 10a012026 hoac cong8888):");
@@ -144,21 +145,16 @@
                 const input = pass.trim().toLowerCase();
                 let found = false;
 
-                // Admin du phong cho lan dau setup
                 if (input === "admin123") { role = "admin"; found = true; } 
                 else {
                     for (let k in accounts) {
                         const acc = accounts[k];
                         let validPass = "";
-                        
                         if (acc.role === "class_manager") {
-                            // Mat khau = ten lop (thuong) + ma 4 so
                             validPass = acc.targetClass.toLowerCase() + acc.pin;
                         } else if (acc.role === "gate") {
-                            // Mat khau = cong + ma 4 so
                             validPass = "cong" + acc.pin;
                         }
-
                         if (input === validPass) {
                             role = acc.role;
                             myClass = acc.targetClass || "";
@@ -185,7 +181,7 @@
             renderTable();
         }
 
-        // 3. Import Excel
+        // XU LY FILE EXCEL
         const fileInp = document.getElementById('fileInput');
         document.getElementById('btnImpHS').addEventListener('click', () => { impType = "hs"; fileInp.click(); });
         document.getElementById('btnImpAcc').addEventListener('click', () => { impType = "acc"; fileInp.click(); });
@@ -213,20 +209,40 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // 4. Tai file mau Excel
+        // 5. TAO FILE MAU CHUAN THEO YEU CAU MAT KHAU MOI
         document.getElementById('btnTemplate').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
-            const ws1 = XLSX.utils.json_to_sheet([{ STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A01", Trang_Thai: "present" }]);
-            XLSX.utils.book_append_sheet(wb, ws1, "HocSinh");
-            const ws2 = XLSX.utils.json_to_sheet([
-                { Ma_4_Ky_Tu: "2026", Quyen: "class_manager", Lop_Target: "10A01" },
-                { Ma_4_Ky_Tu: "8888", Quyen: "gate", Lop_Target: "" }
+            
+            // Sheet Hoc Sinh
+            const wsHS = XLSX.utils.json_to_sheet([
+                { STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A01", Trang_Thai: "present" },
+                { STT: 2, Ho_Ten: "Tran Thi Binh", Lop: "10A02", Trang_Thai: "present" }
             ]);
-            XLSX.utils.book_append_sheet(wb, ws2, "TaiKhoan");
-            XLSX.writeFile(wb, "Mau_Data_HoiTrai.xlsx");
+            XLSX.utils.book_append_sheet(wb, wsHS, "HocSinh");
+            
+            // Sheet Tai Khoan voi huong dan chi tiet
+            const wsAcc = XLSX.utils.json_to_sheet([
+                { 
+                    Huong_Dan: "Mat khau: [Lop_Target viết thường] + [Ma_4_Ky_Tu]",
+                    Ma_4_Ky_Tu: "2026", 
+                    Quyen: "class_manager", 
+                    Lop_Target: "10A01",
+                    Vi_Du_Mat_Khau: "10a012026" 
+                },
+                { 
+                    Huong_Dan: "Mat khau: cong + [Ma_4_Ky_Tu]",
+                    Ma_4_Ky_Tu: "8888", 
+                    Quyen: "gate", 
+                    Lop_Target: "",
+                    Vi_Du_Mat_Khau: "cong8888" 
+                }
+            ]);
+            XLSX.utils.book_append_sheet(wb, wsAcc, "TaiKhoan");
+            
+            XLSX.writeFile(wb, "Mau_Data_HoiTrai_2026.xlsx");
         });
 
-        // 5. Hien thi bang & Loc
+        // HIEN THI & LOC
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -237,7 +253,6 @@
             students.sort((a,b) => a.class.localeCompare(b.class)).forEach((s, idx) => {
                 const matchClass = (fClass === "all" || s.class === fClass);
                 const matchSearch = s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search);
-                
                 if (matchClass && matchSearch) {
                     sTotal++; s.status === "present" ? sPre++ : sAbs++;
                     const canEdit = (role === "admin" || role === "gate" || (role === "class_manager" && myClass === s.class));
@@ -269,7 +284,6 @@
 
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterClass').addEventListener('change', renderTable);
-        
         setInterval(() => {
             const n = new Date();
             document.getElementById('liveTime').innerText = n.toLocaleTimeString('vi-VN');
