@@ -3,34 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quan Ly Hoi Trai 2026 - THPT So 1 Tran Phu</title>
+    <title>Hoi Trai 2026 - THPT So 1 Tran Phu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background-color: #f4f6f8; display: flex; flex-direction: column; min-height: 95vh; }
         .school-header { text-align: center; margin-bottom: 20px; text-transform: uppercase; }
         .school-name { font-size: 1.1rem; color: #555; font-weight: bold; margin: 0; }
         .camp-name { font-size: 2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 10px 0; }
-        
         .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
         .time-display { font-size: 1.4rem; font-weight: bold; font-family: monospace; }
-
         .mode-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         .btn-mode { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #e0e0e0; }
         .active-admin { background-color: #e74c3c !important; color: white; }
-
         .filter-panel { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #d32f2f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
         input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
-        
         .admin-controls { display: none; gap: 10px; border-left: 2px solid #ccc; padding-left: 15px; }
-        .btn-action { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn-action:hover { opacity: 0.8; }
+        .btn-action { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
         .bg-green { background-color: #27ae60; }
         .bg-blue { background-color: #2980b9; }
         .bg-dark { background-color: #34495e; }
-
         .stats { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .stat-number { font-size: 1.4rem; font-weight: bold; display: block; }
-
         .table-container { overflow-x: auto; background: white; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
@@ -38,7 +31,6 @@
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
         .bg-present { background: #d1fae5; color: #065f46; }
         .bg-absent { background: #fee2e2; color: #991b1b; }
-        
         .hidden { display: none; }
         .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 0.85rem; }
     </style>
@@ -135,7 +127,6 @@
             accounts = snap.val() || {};
         });
 
-        // DANG NHAP THEO LOGIC MOI
         document.getElementById('btnAdmin').addEventListener('click', () => {
             if (role === "guest") {
                 const pass = prompt("Nhap mat khau (Vd: 10a012026 hoac cong8888):");
@@ -149,15 +140,11 @@
                     for (let k in accounts) {
                         const acc = accounts[k];
                         let validPass = "";
-                        
                         if (acc.role === "class_manager") {
-                            // Ten lop viet thuong + Ma 4 ky tu (Vd: 10a01 + 2026)
                             validPass = acc.targetClass.toLowerCase() + acc.pin;
                         } else if (acc.role === "gate") {
-                            // Tu khoa cong + Ma 4 ky tu (Vd: cong + 8888)
                             validPass = "cong" + acc.pin;
                         }
-
                         if (input === validPass) {
                             role = acc.role;
                             myClass = acc.targetClass || "";
@@ -165,14 +152,8 @@
                         }
                     }
                 }
-
-                if (found) {
-                    alert("✅ Dang nhap thanh cong!");
-                    setUIMode();
-                } else alert("❌ Sai mat khau!");
-            } else {
-                if (confirm("Dang xuat?")) location.reload();
-            }
+                if (found) { alert("✅ Dang nhap thanh cong!"); setUIMode(); } else alert("❌ Sai mat khau!");
+            } else { if (confirm("Dang xuat?")) location.reload(); }
         });
 
         function setUIMode() {
@@ -203,7 +184,6 @@
                     });
                 } else {
                     json.forEach((r, i) => {
-                        // Lay Ma_4_Ky_Tu thay vi Pass co dinh
                         updates['accounts/acc' + i] = { pin: String(r.Ma_4_Ky_Tu), role: r.Quyen, targetClass: String(r.Lop_Target || "") };
                     });
                 }
@@ -212,34 +192,19 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // 3. CAP NHAT FILE MAU THEO DUNG HUONG DAN
+        // --- HAM TAO FILE MAU DA DUOC SUA COT ---
         document.getElementById('btnTemplate').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
-            
-            // Sheet Hoc Sinh
-            const wsHS = XLSX.utils.json_to_sheet([
-                { STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A01", Trang_Thai: "present" }
-            ]);
+            const wsHS = XLSX.utils.json_to_sheet([{ STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A01", Trang_Thai: "present" }]);
             XLSX.utils.book_append_sheet(wb, wsHS, "HocSinh");
             
-            // Sheet Tai Khoan - DA CAP NHAT COT
+            // SUA COT TAI DAY: Bo cot 'Pass', thay bang 'Ma_4_Ky_Tu'
             const wsAcc = XLSX.utils.json_to_sheet([
-                { 
-                    Ghi_Chu: "MK = [Lop_Target thuong] + [Ma_4_Ky_Tu]", 
-                    Ma_4_Ky_Tu: "2026", 
-                    Quyen: "class_manager", 
-                    Lop_Target: "10A01" 
-                },
-                { 
-                    Ghi_Chu: "MK = cong + [Ma_4_Ky_Tu]", 
-                    Ma_4_Ky_Tu: "8888", 
-                    Quyen: "gate", 
-                    Lop_Target: "" 
-                }
+                { Ma_4_Ky_Tu: "2026", Quyen: "class_manager", Lop_Target: "10A01" },
+                { Ma_4_Ky_Tu: "8888", Quyen: "gate", Lop_Target: "" }
             ]);
             XLSX.utils.book_append_sheet(wb, wsAcc, "TaiKhoan");
-            
-            XLSX.writeFile(wb, "Mau_HoiTrai_2026.xlsx");
+            XLSX.writeFile(wb, "Mau_HoiTrai_Chuan.xlsx");
         });
 
         function renderTable() {
@@ -248,7 +213,6 @@
             const fClass = document.getElementById('filterClass').value;
             tbody.innerHTML = "";
             let sTotal = 0, sPre = 0, sAbs = 0;
-
             students.sort((a,b) => a.class.localeCompare(b.class)).forEach((s, idx) => {
                 const matchClass = (fClass === "all" || s.class === fClass);
                 const matchSearch = s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search);
@@ -280,7 +244,6 @@
                 classes.forEach(c => { const opt = document.createElement('option'); opt.value = opt.innerText = c; select.appendChild(opt); });
             }
         }
-
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterClass').addEventListener('change', renderTable);
         setInterval(() => {
