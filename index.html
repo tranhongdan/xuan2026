@@ -3,135 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hội Trại Xuân 2026 - THPT Số 1 Trần Phú</title>
+    <title>Quan Ly Hoi Trai 2026 - THPT So 1 Tran Phu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background-color: #f4f6f8; display: flex; flex-direction: column; min-height: 95vh; }
-        
-        /* HEADER */
         .school-header { text-align: center; margin-bottom: 20px; text-transform: uppercase; }
-        .school-name { font-size: 1.2rem; color: #555; font-weight: bold; letter-spacing: 1px; margin: 0; }
+        .school-name { font-size: 1.2rem; color: #555; font-weight: bold; margin: 0; }
         .camp-name { font-size: 2.2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-
-        /* CLOCK */
-        .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
         .time-display { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
-        .date-display { font-size: 0.9rem; color: #bdc3c7; }
 
-        /* MODE SWITCHER */
-        .mode-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; background: #e0e0e0; padding: 5px; border-radius: 30px; width: fit-content; margin-left: auto; margin-right: auto; }
-        .btn-mode { padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; color: #555; background: transparent; }
-        .btn-mode.active-guest { background-color: #3498db; color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4); transform: scale(1.05); }
-        .btn-mode.active-admin { background-color: #e74c3c; color: white; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); transform: scale(1.05); }
-        .btn-mode:not(.active-guest):not(.active-admin):hover { background-color: rgba(255,255,255,0.5); }
+        .mode-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .btn-mode { padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #e0e0e0; }
+        .active-user { background-color: #3498db ! deprivation; color: white; }
+        .active-admin { background-color: #e74c3c !important; color: white; }
 
-        /* FILTER & EXPORT */
         .filter-panel { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #d32f2f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .filter-label { font-weight: bold; color: #d32f2f; white-space: nowrap; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
         
-        /* Input Styles */
-        select, input[type="text"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; outline: none; font-size: 1rem; min-width: 150px; }
-        input[type="text"]:focus { border-color: #d32f2f; box-shadow: 0 0 5px rgba(211, 47, 47, 0.2); }
-        
-        .btn-export { background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .btn-upload { background-color: #8e44ad; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
+        .admin-controls { display: none; gap: 10px; border-left: 2px solid #ccc; padding-left: 15px; }
+        .btn-action { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
+        .bg-green { background-color: #27ae60; }
+        .bg-blue { background-color: #2980b9; }
+        .bg-dark { background-color: #34495e; }
 
-        /* STATS */
-        .stats { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .stat-item { text-align: center; }
-        .stat-number { font-size: 1.4rem; display: block; margin-top: 5px; }
-        .stat-note { font-size: 0.8rem; font-weight: normal; color: #bdc3c7; display: block; margin-top: 2px;}
+        .stats { display: flex; justify-content: space-around; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .stat-number { font-size: 1.4rem; font-weight: bold; display: block; }
 
-        /* TABLE */
-        .table-container { flex-grow: 1; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #d32f2f; color: white; text-transform: uppercase; font-size: 0.9rem; white-space: nowrap; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #fff3e0; }
-
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; text-transform: uppercase; display: inline-block; width: 80px; text-align: center; }
-        .bg-present { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .bg-absent { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        th { background-color: #d32f2f; color: white; }
+        .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
+        .bg-present { background: #d1fae5; color: #065f46; }
+        .bg-absent { background: #fee2e2; color: #991b1b; }
         
-        .timestamp-cell { font-size: 0.85rem; color: #666; font-style: italic; }
-        .btn-toggle { background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
         .hidden { display: none; }
-
-        /* FOOTER */
-        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 0.9rem; }
-        .footer strong { color: #2c3e50; }
-        .footer a { color: #d32f2f; text-decoration: none; }
+        .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
     <div class="school-header">
-        <h3 class="school-name">Trường THPT Số 1 Trần Phú</h3>
-        <h1 class="camp-name">HỘI TRẠI XUÂN 2026</h1>
+        <h3 class="school-name">Truong THPT So 1 Tran Phu</h3>
+        <h1 class="camp-name">HOI TRAI XUAN 2026</h1>
     </div>
 
     <div class="clock-container">
         <div id="liveTime" class="time-display">00:00:00</div>
-        <div id="liveDate" class="date-display">...</div>
+        <div id="liveDate" style="font-size: 0.8rem; color: #bdc3c7;">...</div>
     </div>
 
     <div class="mode-container">
-        <button id="btnGuest" class="btn-mode active-guest">👀 Chế độ Khách</button>
-        <button id="btnAdmin" class="btn-mode">🛡️ Chế độ Quản lý</button>
+        <button id="btnGuest" class="btn-mode active-user">👀 Che do Khach</button>
+        <button id="btnAdmin" class="btn-mode">🛡️ Dang nhap Quan ly</button>
     </div>
 
     <div class="filter-panel">
-        <span class="filter-label">🔍 TÌM KIẾM:</span>
-        <input type="text" id="searchInput" placeholder="Tìm tên, gõ tắt (NVA)...">
-        
+        <input type="text" id="searchInput" placeholder="Tim ten, nva...">
         <select id="filterClass">
-            <option value="all">-- Đang tải dữ liệu... --</option>
+            <option value="all">-- Tat ca lop --</option>
         </select>
-        <select id="filterStatus">
-            <option value="all">-- Tất cả trạng thái --</option>
-            <option value="present">Đang có mặt</option>
-            <option value="absent">Đang vắng</option>
-        </select>
-        <button class="btn-export" id="btnExport">📥 Xuất Excel</button>
-        <button class="btn-upload" id="btnUploadData">⬆️ Nạp Dữ Liệu</button>
+        
+        <div id="adminTools" class="admin-controls">
+            <button class="btn-action bg-dark" id="btnTemplate">📄 Tai Mau</button>
+            <button class="btn-action bg-green" id="btnImpHS">📤 Nhap HS</button>
+            <button class="btn-action bg-blue" id="btnImpAcc">🔑 Nhap Acc</button>
+            <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls">
+        </div>
+
+        <button class="btn-action bg-green" id="btnExport" style="margin-left: auto;">📥 Xuat Excel</button>
     </div>
 
     <div class="stats">
-        <div class="stat-item">
-            <span>TỔNG SỐ</span><span class="stat-note">(Đang hiển thị)</span>
-            <span id="statTotal" class="stat-number" style="color: #f1c40f;">...</span>
-        </div>
-        <div class="stat-item">
-            <span>CÓ MẶT</span><span class="stat-note">(Thực tế)</span>
-            <span id="statPresent" class="stat-number" style="color: #2ecc71;">...</span>
-        </div>
-        <div class="stat-item">
-            <span>VẮNG</span><span class="stat-note">(Thực tế)</span>
-            <span id="statAbsent" class="stat-number" style="color: #ff6b6b;">...</span>
-        </div>
+        <div style="text-align:center">TONG<span id="statTotal" class="stat-number" style="color:#f1c40f">0</span></div>
+        <div style="text-align:center">CO MAT<span id="statPresent" class="stat-number" style="color:#2ecc71">0</span></div>
+        <div style="text-align:center">VANG<span id="statAbsent" class="stat-number" style="color:#e74c3c">0</span></div>
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 50px;">STT</th>
-                    <th style="width: 100px;">Lớp</th>
-                    <th>Họ và Tên</th>
-                    <th style="width: 120px;">Trạng Thái</th>
-                    <th style="width: 150px;">Cập nhật lúc</th>
-                    <th style="width: 100px;" id="colAction" class="hidden">Thao tác</th>
+                    <th>STT</th>
+                    <th>Lop</th>
+                    <th>Ho va Ten</th>
+                    <th>Trang Thai</th>
+                    <th>Cap nhat</th>
+                    <th id="colAction" class="hidden">Thao tac</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="6" style="text-align:center; padding: 20px;">Đang kết nối đến máy chủ Firebase...</td></tr>
+                <tr><td colspan="6" style="text-align:center">Dang tai du lieu...</td></tr>
             </tbody>
         </table>
     </div>
 
     <div class="footer">
-        © 2026 Phát triển bởi: <strong>Trần Hồng Dân</strong><br>
-        Email: <a href="mailto:tranhongdan@tranphudlk.edu.vn">tranhongdan@tranphudlk.edu.vn</a>
+        Thiet ke boi: <strong>Tran Hong Dan</strong> | 2026
     </div>
 
     <script type="module">
@@ -140,1313 +110,177 @@
 
         // 1. CONFIG FIREBASE
         const firebaseConfig = {
-          apiKey: "AIzaSyDEnDE2pOyfKZYUPCSXgaHaR2b9h_AjAe8",
-          authDomain: "hoitrai2026.firebaseapp.com",
-          databaseURL: "https://hoitrai2026-default-rtdb.asia-southeast1.firebasedatabase.app",
-          projectId: "hoitrai2026",
-          storageBucket: "hoitrai2026.firebasestorage.app",
-          messagingSenderId: "648028043852",
-          appId: "1:648028043852:web:9d0b07f6823fcec5fa12e9"
+            apiKey: "AIzaSyDEnDE2pOyfKZYUPCSXgaHaR2b9h_AjAe8",
+            authDomain: "hoitrai2026.firebaseapp.com",
+            databaseURL: "https://hoitrai2026-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hoitrai2026",
+            storageBucket: "hoitrai2026.firebasestorage.app",
+            messagingSenderId: "648028043852",
+            appId: "1:648028043852:web:9d0b07f6823fcec5fa12e9"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        // 2. DỮ LIỆU GỐC
-        const initialStudentsData = [
-    { id: 1, name: "NGUYỄN TẤN HOÀNG ANH", class: "10A01", status: "present" },
-    { id: 2, name: "NGUYỄN TUẤN ANH", class: "10A01", status: "present" },
-    { id: 3, name: "MAI THÁI BẢO", class: "10A01", status: "present" },
-    { id: 4, name: "THÂN VĂN BẢO", class: "10A01", status: "present" },
-    { id: 5, name: "HOÀNG NGỌC BẢO CHÂU", class: "10A01", status: "present" },
-    { id: 6, name: "LÊ NGỌC DIỆP", class: "10A01", status: "present" },
-    { id: 7, name: "HUỲNH ĐÀM BÌNH DƯƠNG", class: "10A01", status: "present" },
-    { id: 8, name: "NGUYỄN MINH ĐỨC", class: "10A01", status: "present" },
-    { id: 9, name: "TRẦN KHÁNH HÀ", class: "10A01", status: "present" },
-    { id: 10, name: "VŨ HOÀNG MINH HẰNG", class: "10A01", status: "present" },
-    { id: 11, name: "ĐỖ BẢO HÂN", class: "10A01", status: "present" },
-    { id: 12, name: "NGUYỄN NGỌC GIA HÂN", class: "10A01", status: "present" },
-    { id: 13, name: "TRẦN TRUNG HIẾU", class: "10A01", status: "present" },
-    { id: 14, name: "TRẦN GIA HUY", class: "10A01", status: "present" },
-    { id: 15, name: "NGUYỄN TẤN HƯNG", class: "10A01", status: "present" },
-    { id: 16, name: "TRƯƠNG GIA HƯNG", class: "10A01", status: "present" },
-    { id: 17, name: "NGÔ THỊ MỸ LỆ", class: "10A01", status: "present" },
-    { id: 18, name: "VŨ DUY MẠNH", class: "10A01", status: "present" },
-    { id: 19, name: "LÊ NGUYỄN KHÁNH NAM", class: "10A01", status: "present" },
-    { id: 20, name: "NGUYỄN HỒNG BẢO NGỌC", class: "10A01", status: "present" },
-    { id: 21, name: "NGUYỄN VÕ NHƯ NGỌC", class: "10A01", status: "present" },
-    { id: 22, name: "PHẠM THỊ BẢO NGỌC", class: "10A01", status: "present" },
-    { id: 23, name: "VI THÁI NGUYÊN", class: "10A01", status: "present" },
-    { id: 24, name: "ĐINH HOÀNG YẾN NHI", class: "10A01", status: "present" },
-    { id: 25, name: "NGUYỄN THỊ NGỌC NHUNG", class: "10A01", status: "present" },
-    { id: 26, name: "NGUYỄN HỒNG PHÚC", class: "10A01", status: "present" },
-    { id: 27, name: "NGUYỄN THANH QUỲNH", class: "10A01", status: "present" },
-    { id: 28, name: "LÊ THANH TÂM", class: "10A01", status: "present" },
-    { id: 29, name: "NGUYỄN VĂN THÁI", class: "10A01", status: "present" },
-    { id: 30, name: "VÕ NHƯ THẢO", class: "10A01", status: "present" },
-    { id: 31, name: "NGUYỄN THỊ THANH THÚY", class: "10A01", status: "present" },
-    { id: 32, name: "NGUYỄN ANH THƯ", class: "10A01", status: "present" },
-    { id: 33, name: "TRƯƠNG NGỌC HUYỀN TRÂM", class: "10A01", status: "present" },
-    { id: 34, name: "NGUYỄN LÊ THÀNH TRUNG", class: "10A01", status: "present" },
-    { id: 35, name: "NGUYỄN VĂN TUẤN", class: "10A01", status: "present" },
-    { id: 36, name: "NGUYỄN NGỌC PHƯƠNG UYÊN", class: "10A01", status: "present" },
-    { id: 37, name: "PHẠM NGUYÊN VŨ", class: "10A01", status: "present" },
-    { id: 38, name: "Phan Thế Thành", class: "10A01", status: "present" },
-    { id: 39, name: "LÒ QUYẾT ANH", class: "10A02", status: "present" },
-    { id: 40, name: "NGUYỄN THỊ BẢO ANH", class: "10A02", status: "present" },
-    { id: 41, name: "H ANR - NIÊ", class: "10A02", status: "present" },
-    { id: 42, name: "ĐOÀN BĂNG BĂNG", class: "10A02", status: "present" },
-    { id: 43, name: "LÊ PHẠM KIỀU DUYÊN", class: "10A02", status: "present" },
-    { id: 44, name: "VÕ THÀNH ĐẠT", class: "10A02", status: "present" },
-    { id: 45, name: "TRỊNH THANH HÀ", class: "10A02", status: "present" },
-    { id: 46, name: "VŨ HOÀNG HIỆP", class: "10A02", status: "present" },
-    { id: 47, name: "NGUYỄN THỊ VIỆT HÒA", class: "10A02", status: "present" },
-    { id: 48, name: "VÕ HOÀNG LÊ HUY", class: "10A02", status: "present" },
-    { id: 49, name: "PHAN THỊ THU HUYỀN", class: "10A02", status: "present" },
-    { id: 50, name: "TRẦN THỊ KHÁNH HUYỀN", class: "10A02", status: "present" },
-    { id: 51, name: "H - JHAN - NIÊ", class: "10A02", status: "present" },
-    { id: 52, name: "HOÀNG TRUNG KIÊN", class: "10A02", status: "present" },
-    { id: 53, name: "PHẠM VĂN LÂM", class: "10A02", status: "present" },
-    { id: 54, name: "NGUYỄN THỊ MỸ LINH", class: "10A02", status: "present" },
-    { id: 55, name: "VÕ THỊ TRÚC LINH", class: "10A02", status: "present" },
-    { id: 56, name: "NGUYỄN HOÀNG LONG", class: "10A02", status: "present" },
-    { id: 57, name: "NGUYỄN VĂN LỘC", class: "10A02", status: "present" },
-    { id: 58, name: "Y LỰC NIÊ", class: "10A02", status: "present" },
-    { id: 59, name: "LÊ TRẦN KHÁNH LY", class: "10A02", status: "present" },
-    { id: 60, name: "NGÔ THỊ TRÚC LY", class: "10A02", status: "present" },
-    { id: 61, name: "HOÀNG NHẬT MINH", class: "10A02", status: "present" },
-    { id: 62, name: "HUỲNH THỊ NGÂN", class: "10A02", status: "present" },
-    { id: 63, name: "NGUYỄN MỸ NGỌC", class: "10A02", status: "present" },
-    { id: 64, name: "PHẠM TRẦN BẢO NGỌC", class: "10A02", status: "present" },
-    { id: 65, name: "NGUYỄN NGỌC MI NI", class: "10A02", status: "present" },
-    { id: 66, name: "TĂNG THỊ KIỀU OANH", class: "10A02", status: "present" },
-    { id: 67, name: "H SÊNI BYĂ", class: "10A02", status: "present" },
-    { id: 68, name: "NGUYỄN ANH THƯ", class: "10A02", status: "present" },
-    { id: 69, name: "NGUYỄN TRẦN MINH THƯ", class: "10A02", status: "present" },
-    { id: 70, name: "NGUYỄN TRỊNH HOÀI THƯƠNG", class: "10A02", status: "present" },
-    { id: 71, name: "TRẦN LÂM TÂY THY", class: "10A02", status: "present" },
-    { id: 72, name: "VÕ THỊ BÍCH TRÂM", class: "10A02", status: "present" },
-    { id: 73, name: "H' TRÚC BYĂ", class: "10A02", status: "present" },
-    { id: 74, name: "LƯƠNG NGUYỄN CÁT TƯỜNG", class: "10A02", status: "present" },
-    { id: 75, name: "BÙI THỊ HỒNG VÂN", class: "10A02", status: "present" },
-    { id: 76, name: "NGUYỄN HÀ VI", class: "10A02", status: "present" },
-    { id: 77, name: "LÊ HOÀNG VŨ", class: "10A02", status: "present" },
-    { id: 78, name: "HOÀNG PHAN YẾN", class: "10A02", status: "present" },
-    { id: 79, name: "VŨ THỊ MINH ANH", class: "10A03", status: "present" },
-    { id: 80, name: "BÙI HOÀNG BẢO", class: "10A03", status: "present" },
-    { id: 81, name: "PHẠM HOÀNG GIA BẢO", class: "10A03", status: "present" },
-    { id: 82, name: "LƯỜNG TÀI CHIẾN", class: "10A03", status: "present" },
-    { id: 83, name: "NGUYỄN MINH ĐỨC", class: "10A03", status: "present" },
-    { id: 84, name: "CHU NGUYỄN HOÀNG HÀ", class: "10A03", status: "present" },
-    { id: 85, name: "NGUYỄN MINH HẢI", class: "10A03", status: "present" },
-    { id: 86, name: "NGÔ QUỐC HÀO", class: "10A03", status: "present" },
-    { id: 87, name: "NGUYỄN TRUNG HIẾU", class: "10A03", status: "present" },
-    { id: 88, name: "PHÙNG LÊ HUY", class: "10A03", status: "present" },
-    { id: 89, name: "TÔ NGỌC HƯNG", class: "10A03", status: "present" },
-    { id: 90, name: "HOÀNG THƯ KIỀU", class: "10A03", status: "present" },
-    { id: 91, name: "NGUYỄN THỊ THÚY LAN", class: "10A03", status: "present" },
-    { id: 92, name: "NGUYỄN THỊ LINH LINH", class: "10A03", status: "present" },
-    { id: 93, name: "TRẦN BẢO LỘC", class: "10A03", status: "present" },
-    { id: 94, name: "LƯU ĐỨC BẢO MINH", class: "10A03", status: "present" },
-    { id: 95, name: "TRẦN BẢO NAM", class: "10A03", status: "present" },
-    { id: 96, name: "THOÒNG TRỌNG NGHĨA", class: "10A03", status: "present" },
-    { id: 97, name: "HỒ KIM NGỌC", class: "10A03", status: "present" },
-    { id: 98, name: "NGUYỄN LÊ BẢO NGỌC", class: "10A03", status: "present" },
-    { id: 99, name: "LÊ THANH NHÀN", class: "10A03", status: "present" },
-    { id: 100, name: "NGUYỄN THỊ YẾN NHI", class: "10A03", status: "present" },
-    { id: 101, name: "NGUYỄN YẾN NHI", class: "10A03", status: "present" },
-    { id: 102, name: "VĂN THỊ Ý NHI", class: "10A03", status: "present" },
-    { id: 103, name: "TRẦN HỮU PHÁT", class: "10A03", status: "present" },
-    { id: 104, name: "TRẦN NGUYỄN MINH PHÚ", class: "10A03", status: "present" },
-    { id: 105, name: "TRẦN QUANG PHÚ", class: "10A03", status: "present" },
-    { id: 106, name: "TRẦN NGUYỄN THU PHƯƠNG", class: "10A03", status: "present" },
-    { id: 107, name: "HOÀNG THỊ PHƯỢNG", class: "10A03", status: "present" },
-    { id: 108, name: "LÒ VĂN QUÂN", class: "10A03", status: "present" },
-    { id: 109, name: "H PHÔ SA ALIÔ", class: "10A03", status: "present" },
-    { id: 110, name: "NGUYỄN CÔNG THI", class: "10A03", status: "present" },
-    { id: 111, name: "TRẦN LÊ ĐỨC THỌ", class: "10A03", status: "present" },
-    { id: 112, name: "NGUYỄN THỊ THÙY TRANG", class: "10A03", status: "present" },
-    { id: 113, name: "PHẠM NGỌC BẢO TRÂM", class: "10A03", status: "present" },
-    { id: 114, name: "HỒ GIA TUỆ", class: "10A03", status: "present" },
-    { id: 115, name: "BẾ TRUNG TUYẾN", class: "10A03", status: "present" },
-    { id: 116, name: "PHẠM TRẦN NGỌC VINH", class: "10A03", status: "present" },
-    { id: 117, name: "PHẠM TƯỜNG VY", class: "10A03", status: "present" },
-    { id: 118, name: "HÀ TRÍ VỸ", class: "10A03", status: "present" },
-    { id: 119, name: "ĐẶNG THỊ NHƯ Ý", class: "10A03", status: "present" },
-    { id: 120, name: "H YUIT NIÊ KDĂM", class: "10A03", status: "present" },
-    { id: 121, name: "HOÀNG THỊ VÂN ANH", class: "10A04", status: "present" },
-    { id: 122, name: "NGUYỄN TẤN NHẬT ANH", class: "10A04", status: "present" },
-    { id: 123, name: "TRẦN TUẤN ANH", class: "10A04", status: "present" },
-    { id: 124, name: "LÊ CHÍ QUỐC BẢO", class: "10A04", status: "present" },
-    { id: 125, name: "LƯU GIA BẢO", class: "10A04", status: "present" },
-    { id: 126, name: "MAI PHÚ CƯỜNG", class: "10A04", status: "present" },
-    { id: 127, name: "HUỲNH PHƯỚC DŨNG", class: "10A04", status: "present" },
-    { id: 128, name: "PHẠM LÊ ANH DUY", class: "10A04", status: "present" },
-    { id: 129, name: "HỒ ĐÌNH HẢI ĐĂNG", class: "10A04", status: "present" },
-    { id: 130, name: "H' HẰNG BKRÔNG", class: "10A04", status: "present" },
-    { id: 131, name: "NGUYỄN XUÂN THU HIỀN", class: "10A04", status: "present" },
-    { id: 132, name: "NGUYỄN THÁI HÒA", class: "10A04", status: "present" },
-    { id: 133, name: "TRẦN MINH HOÀNG", class: "10A04", status: "present" },
-    { id: 134, name: "NGUYỄN HOÀNG NHẬT HUY", class: "10A04", status: "present" },
-    { id: 135, name: "CAO THANH HUYỀN", class: "10A04", status: "present" },
-    { id: 136, name: "NGUYỄN THỊ NGỌC HUYỀN", class: "10A04", status: "present" },
-    { id: 137, name: "NGUYỄN PHÚC HƯNG", class: "10A04", status: "present" },
-    { id: 138, name: "Y JÊM KBUÔR", class: "10A04", status: "present" },
-    { id: 139, name: "H LIAN NIÊ", class: "10A04", status: "present" },
-    { id: 140, name: "PHAN THỊ THÙY LINH", class: "10A04", status: "present" },
-    { id: 141, name: "H LORA BKRÔNG", class: "10A04", status: "present" },
-    { id: 142, name: "HÀ ANH LUÂN", class: "10A04", status: "present" },
-    { id: 143, name: "DƯƠNG ĐÌNH NAM", class: "10A04", status: "present" },
-    { id: 144, name: "HUỲNH THỊ KIM NGÂN", class: "10A04", status: "present" },
-    { id: 145, name: "HOÀNG BẢO NHẬT", class: "10A04", status: "present" },
-    { id: 146, name: "TRẦN MINH NHẬT", class: "10A04", status: "present" },
-    { id: 147, name: "PHẠM QUANG PHÚC", class: "10A04", status: "present" },
-    { id: 148, name: "PHẠM THỊ NGỌC QUYÊN", class: "10A04", status: "present" },
-    { id: 149, name: "DƯƠNG THỊ NHƯ QUỲNH", class: "10A04", status: "present" },
-    { id: 150, name: "NGUYỄN HẢI SANG", class: "10A04", status: "present" },
-    { id: 151, name: "BÙI NHẬT THÀNH", class: "10A04", status: "present" },
-    { id: 152, name: "LÊ THỊ THU", class: "10A04", status: "present" },
-    { id: 153, name: "TRẦN NGUYỄN ANH THƯ", class: "10A04", status: "present" },
-    { id: 154, name: "ĐINH VĂN TIẾN", class: "10A04", status: "present" },
-    { id: 155, name: "ĐẶNG THÙY TRANG", class: "10A04", status: "present" },
-    { id: 156, name: "NGUYỄN THỊ NGỌC TRÂM", class: "10A04", status: "present" },
-    { id: 157, name: "ĐẶNG NGUYÊN VŨ", class: "10A04", status: "present" },
-    { id: 158, name: "NGUYỄN THỊ NGỌC ÁNH", class: "10A05", status: "present" },
-    { id: 159, name: "VÀNG GIA BẢO", class: "10A05", status: "present" },
-    { id: 160, name: "LÙ HOÀNG DỰ", class: "10A05", status: "present" },
-    { id: 161, name: "TRẦN LƯƠNG ĐẠT", class: "10A05", status: "present" },
-    { id: 162, name: "TÔN NGUYỄN NGỌC HÂN", class: "10A05", status: "present" },
-    { id: 163, name: "TRƯƠNG GIA HÂN", class: "10A05", status: "present" },
-    { id: 164, name: "NGUYỄN THỊ THẢO HIỀN", class: "10A05", status: "present" },
-    { id: 165, name: "HỒ QUỐC HUY", class: "10A05", status: "present" },
-    { id: 166, name: "NGUYỄN MAI LỆ HUYỀN", class: "10A05", status: "present" },
-    { id: 167, name: "TRƯƠNG KHẮC HY", class: "10A05", status: "present" },
-    { id: 168, name: "TRƯƠNG KHẮC HỶ", class: "10A05", status: "present" },
-    { id: 169, name: "TÔ THỊ THÚY LAN", class: "10A05", status: "present" },
-    { id: 170, name: "ĐIỂU HÀ LÊ HĐƠK", class: "10A05", status: "present" },
-    { id: 171, name: "TRẦN THỊ THÙY LINH", class: "10A05", status: "present" },
-    { id: 172, name: "ĐÀM THẾ HUỲNH LƯU", class: "10A05", status: "present" },
-    { id: 173, name: "ĐẶNG BẢO MINH", class: "10A05", status: "present" },
-    { id: 174, name: "H LO NA HĐƠK", class: "10A05", status: "present" },
-    { id: 175, name: "NGUYỄN THỊ THU NGUYỆT", class: "10A05", status: "present" },
-    { id: 176, name: "H' NHEN BYĂ", class: "10A05", status: "present" },
-    { id: 177, name: "H' NHU BYĂ", class: "10A05", status: "present" },
-    { id: 178, name: "HÀ ĐÌNH PHONG", class: "10A05", status: "present" },
-    { id: 179, name: "NGUYỄN VĂN PHONG", class: "10A05", status: "present" },
-    { id: 180, name: "NGUYỄN MINH PHÚ", class: "10A05", status: "present" },
-    { id: 181, name: "Y PÔL - HĐƠK", class: "10A05", status: "present" },
-    { id: 182, name: "TRƯƠNG LÊ PHƯƠNG QUỲNH", class: "10A05", status: "present" },
-    { id: 183, name: "NGUYỄN THU SANG", class: "10A05", status: "present" },
-    { id: 184, name: "BÙI THÁI SƠN", class: "10A05", status: "present" },
-    { id: 185, name: "HUỲNH THỊ PHƯỚC TÂM", class: "10A05", status: "present" },
-    { id: 186, name: "ĐOÀN NHẬT TÂN", class: "10A05", status: "present" },
-    { id: 187, name: "MAO NHẬT THIÊN", class: "10A05", status: "present" },
-    { id: 188, name: "HUỲNH THỊ THANH THUẬN", class: "10A05", status: "present" },
-    { id: 189, name: "ĐẶNG XUÂN THÙY", class: "10A05", status: "present" },
-    { id: 190, name: "HOÀNG THỊ ANH THƯ", class: "10A05", status: "present" },
-    { id: 191, name: "ĐỖ THỊ THƯƠNG", class: "10A05", status: "present" },
-    { id: 192, name: "TRẦN THỊ THỦY TIÊN", class: "10A05", status: "present" },
-    { id: 193, name: "LÊ THANH TÙNG", class: "10A05", status: "present" },
-    { id: 194, name: "NGUYỄN VŨ TƯỜNG VY", class: "10A05", status: "present" },
-    { id: 195, name: "NGUYỄN THỊ NHƯ Ý", class: "10A05", status: "present" },
-    { id: 196, name: "H NHƯ Ý BYĂ", class: "10A05", status: "present" },
-    { id: 197, name: "BÙI LÊ QUỲNH ANH", class: "10A06", status: "present" },
-    { id: 198, name: "HUỲNH THỊ HỒNG ANH", class: "10A06", status: "present" },
-    { id: 199, name: "PHẠM THỊ PHƯƠNG ANH", class: "10A06", status: "present" },
-    { id: 200, name: "ĐINH GIA BẢO", class: "10A06", status: "present" },
-    { id: 201, name: "LƯƠNG TRỌNG BẢO", class: "10A06", status: "present" },
-    { id: 202, name: "NGUYỄN THÁI BẢO", class: "10A06", status: "present" },
-    { id: 203, name: "TẠ QUỐC BẢO", class: "10A06", status: "present" },
-    { id: 204, name: "NGUYỄN THỊ KIM BÌNH", class: "10A06", status: "present" },
-    { id: 205, name: "TRẦN ĐÔNG DƯƠNG", class: "10A06", status: "present" },
-    { id: 206, name: "NGUYỄN HẢI ĐĂNG", class: "10A06", status: "present" },
-    { id: 207, name: "VŨ HOÀNG MINH ĐĂNG", class: "10A06", status: "present" },
-    { id: 208, name: "ĐỖ NGUYỄN TÂM ĐOAN", class: "10A06", status: "present" },
-    { id: 209, name: "NÙNG THỊ MỸ HẠNH", class: "10A06", status: "present" },
-    { id: 210, name: "TRỊNH NGỌC HẬU", class: "10A06", status: "present" },
-    { id: 211, name: "LƯƠNG TRỌNG HIẾU", class: "10A06", status: "present" },
-    { id: 212, name: "NGUYỄN ANH HIẾU", class: "10A06", status: "present" },
-    { id: 213, name: "HUỲNH PHƯỚC HOÀNG", class: "10A06", status: "present" },
-    { id: 214, name: "NGUYỄN NGỌC CAO HUY", class: "10A06", status: "present" },
-    { id: 215, name: "NGUYỄN THỊ QUỲNH HƯƠNG", class: "10A06", status: "present" },
-    { id: 216, name: "VŨ NGỌC THIÊN KIM", class: "10A06", status: "present" },
-    { id: 217, name: "PHẠM LÊ NGỌC LUÂN", class: "10A06", status: "present" },
-    { id: 218, name: "TRẦN NHẬT MINH", class: "10A06", status: "present" },
-    { id: 219, name: "H MUIN ÊBAN", class: "10A06", status: "present" },
-    { id: 220, name: "H' LY NANG ALIÔ", class: "10A06", status: "present" },
-    { id: 221, name: "ĐỖ NGỌC KIM NGÂN", class: "10A06", status: "present" },
-    { id: 222, name: "NGÔ THỊ ÁNH NGỌC", class: "10A06", status: "present" },
-    { id: 223, name: "NGUYỄN THANH NHI", class: "10A06", status: "present" },
-    { id: 224, name: "NGUYỄN CAO THIỆN PHÁT", class: "10A06", status: "present" },
-    { id: 225, name: "ĐÀM QUANG QUÝ", class: "10A06", status: "present" },
-    { id: 226, name: "H' QUỲNH ALIÔ", class: "10A06", status: "present" },
-    { id: 227, name: "HOÀNG BẢO THẮNG", class: "10A06", status: "present" },
-    { id: 228, name: "ĐOÀN NGỌC ANH THƯ", class: "10A06", status: "present" },
-    { id: 229, name: "ĐỖ LÊ ANH THƯ", class: "10A06", status: "present" },
-    { id: 230, name: "HÀ THỊ KHÁNH THƯ", class: "10A06", status: "present" },
-    { id: 231, name: "TRƯƠNG THỊ BẢO TRÂM", class: "10A06", status: "present" },
-    { id: 232, name: "LƯU QUANG TUẤN", class: "10A06", status: "present" },
-    { id: 233, name: "HUỲNH THÙY VY", class: "10A06", status: "present" },
-    { id: 234, name: "NGUYỄN THỊ NGỌC YẾN", class: "10A06", status: "present" },
-    { id: 235, name: "PHẠM THỊ YẾN", class: "10A06", status: "present" },
-    { id: 236, name: "NGUYỄN LÊ THÚY AN", class: "10A07", status: "present" },
-    { id: 237, name: "NGUYỄN VĂN GIA AN", class: "10A07", status: "present" },
-    { id: 238, name: "LÊ QUỲNH ANH", class: "10A07", status: "present" },
-    { id: 239, name: "VŨ THỊ MINH CHÂU", class: "10A07", status: "present" },
-    { id: 240, name: "ĐOÀN CÔNG DANH", class: "10A07", status: "present" },
-    { id: 241, name: "NGUYỄN TẤN DŨNG", class: "10A07", status: "present" },
-    { id: 242, name: "ĐẶNG KHẮC ĐIỆP", class: "10A07", status: "present" },
-    { id: 243, name: "NGUYỄN HUỲNH ĐỨC", class: "10A07", status: "present" },
-    { id: 244, name: "NGÔ MAI NGỌC HÀ", class: "10A07", status: "present" },
-    { id: 245, name: "NGUYỄN THỊ HÀ", class: "10A07", status: "present" },
-    { id: 246, name: "NGUYỄN TRUNG HẢI", class: "10A07", status: "present" },
-    { id: 247, name: "ĐỖ THỊ HẰNG", class: "10A07", status: "present" },
-    { id: 248, name: "NGUYỄN THỊ THU HÂN", class: "10A07", status: "present" },
-    { id: 249, name: "LÊ VĂN VŨ HIỆP", class: "10A07", status: "present" },
-    { id: 250, name: "ĐINH GIA HUY", class: "10A07", status: "present" },
-    { id: 251, name: "NGUYỄN QUỐC HUY", class: "10A07", status: "present" },
-    { id: 252, name: "QUANG QUỐC HUY", class: "10A07", status: "present" },
-    { id: 253, name: "NGUYỄN NGỌC DIỆU HUYỀN", class: "10A07", status: "present" },
-    { id: 254, name: "TRẦN NGỌC KHÁNH HUYỀN", class: "10A07", status: "present" },
-    { id: 255, name: "NGUYỄN NHƯ TRÚC LOAN", class: "10A07", status: "present" },
-    { id: 256, name: "CHÂU THỊ CẨM LY", class: "10A07", status: "present" },
-    { id: 257, name: "ĐOÀN TRẦN BẢO NGỌC", class: "10A07", status: "present" },
-    { id: 258, name: "KHƯƠNG YẾN NHI", class: "10A07", status: "present" },
-    { id: 259, name: "NGUYỄN HUỲNH PHƯƠNG NHI", class: "10A07", status: "present" },
-    { id: 260, name: "TRỊNH THỊ YẾN NHI", class: "10A07", status: "present" },
-    { id: 261, name: "TRẦN THỊ HỒNG NHUNG", class: "10A07", status: "present" },
-    { id: 262, name: "PHÙNG LÊ NHƯ", class: "10A07", status: "present" },
-    { id: 263, name: "ĐOÀN DUY PHƯƠNG", class: "10A07", status: "present" },
-    { id: 264, name: "LÊ NHÃ QUYÊN", class: "10A07", status: "present" },
-    { id: 265, name: "NGUYỄN VÕ DẠ QUYÊN", class: "10A07", status: "present" },
-    { id: 266, name: "VŨ THỊ NHÃ QUYÊN", class: "10A07", status: "present" },
-    { id: 267, name: "VŨ NGÂN THƯƠNG", class: "10A07", status: "present" },
-    { id: 268, name: "NGUYỄN THỊ NGỌC TRÂM", class: "10A07", status: "present" },
-    { id: 269, name: "NGUYỄN THÁI XUÂN TRINH", class: "10A07", status: "present" },
-    { id: 270, name: "DƯƠNG THỊ TỐ UYÊN", class: "10A07", status: "present" },
-    { id: 271, name: "NGUYỄN NGỌC PHƯƠNG UYÊN", class: "10A07", status: "present" },
-    { id: 272, name: "ĐÀO BẢO YẾN", class: "10A07", status: "present" },
-    { id: 273, name: "LÒ HOÀNG NHẬT ANH", class: "10A08", status: "present" },
-    { id: 274, name: "PHẠM ĐĂNG NHẬT ANH", class: "10A08", status: "present" },
-    { id: 275, name: "Y DUY KTUL", class: "10A08", status: "present" },
-    { id: 276, name: "NGUYỄN VŨ TẤN ĐẠT", class: "10A08", status: "present" },
-    { id: 277, name: "LÊ QUANG HÀ", class: "10A08", status: "present" },
-    { id: 278, name: "Y HAN BYĂ", class: "10A08", status: "present" },
-    { id: 279, name: "ĐỖ GIA HÂN KBUÔR", class: "10A08", status: "present" },
-    { id: 280, name: "DƯƠNG KHẮC HIẾU", class: "10A08", status: "present" },
-    { id: 281, name: "H HIM HĐƠK", class: "10A08", status: "present" },
-    { id: 282, name: "PHẠM THẾ HÙNG", class: "10A08", status: "present" },
-    { id: 283, name: "H' KARIN - BYĂ", class: "10A08", status: "present" },
-    { id: 284, name: "NGUYỄN DUY LÂM", class: "10A08", status: "present" },
-    { id: 285, name: "PHẠM TRUNG LÂM", class: "10A08", status: "present" },
-    { id: 286, name: "PHAN HỮU HOÀNG LÂM", class: "10A08", status: "present" },
-    { id: 287, name: "HUỲNH THỊ PHƯỚC MỸ", class: "10A08", status: "present" },
-    { id: 288, name: "NGUYỄN BẢO NAM", class: "10A08", status: "present" },
-    { id: 289, name: "HÀ BẢO NGỌC", class: "10A08", status: "present" },
-    { id: 290, name: "NGUYỄN BẢO NGỌC", class: "10A08", status: "present" },
-    { id: 291, name: "NGUYỄN THỊ BÍCH NGỌC", class: "10A08", status: "present" },
-    { id: 292, name: "NGUYỄN ĐĂNG NGUYÊN", class: "10A08", status: "present" },
-    { id: 293, name: "Y NGUYÊN NIÊ KBUÔR", class: "10A08", status: "present" },
-    { id: 294, name: "NGUYỄN THIỆN NHÂN", class: "10A08", status: "present" },
-    { id: 295, name: "NGUYỄN MINH NHẬT", class: "10A08", status: "present" },
-    { id: 296, name: "NGUYỄN THỊ PHƯƠNG NHI", class: "10A08", status: "present" },
-    { id: 297, name: "H ÑIANG KTUL", class: "10A08", status: "present" },
-    { id: 298, name: "NGUYỄN TẤN PHÁT", class: "10A08", status: "present" },
-    { id: 299, name: "LÔ THÀNH PHONG", class: "10A08", status: "present" },
-    { id: 300, name: "NGUYỄN HOÀNG QUÂN", class: "10A08", status: "present" },
-    { id: 301, name: "H SUCHIN-ÊYA", class: "10A08", status: "present" },
-    { id: 302, name: "NGUYỄN ANH THÁI", class: "10A08", status: "present" },
-    { id: 303, name: "CAO NGUYỄN THANH THẢO", class: "10A08", status: "present" },
-    { id: 304, name: "NGUYỄN NGỌC ANH THƯ", class: "10A08", status: "present" },
-    { id: 305, name: "H THƯ-HĐƠK", class: "10A08", status: "present" },
-    { id: 306, name: "LÊ TRÍ THỨC", class: "10A08", status: "present" },
-    { id: 307, name: "BÙI THỊ THỦY TIÊN", class: "10A08", status: "present" },
-    { id: 308, name: "LÊ THỊ PHƯƠNG TRANG", class: "10A08", status: "present" },
-    { id: 309, name: "HỒ NGỌC BẢO TRÂM", class: "10A08", status: "present" },
-    { id: 310, name: "LÊ THỊ BÍCH TUYỀN", class: "10A08", status: "present" },
-    { id: 311, name: "MAI HOÀNG VŨ", class: "10A08", status: "present" },
-    { id: 312, name: "ĐẶNG THỊ NGỌC CHI", class: "10A08", status: "present" },
-    { id: 313, name: "LÊ THỊ LAN ANH", class: "10A09", status: "present" },
-    { id: 314, name: "NGUYỄN HOÀNG ANH", class: "10A09", status: "present" },
-    { id: 315, name: "NGUYỄN THỊ KIM ANH", class: "10A09", status: "present" },
-    { id: 316, name: "PHAN THỊ DUNG", class: "10A09", status: "present" },
-    { id: 317, name: "LÊ THỊ BẢO ĐANG", class: "10A09", status: "present" },
-    { id: 318, name: "NGUYỄN TUYỂN HẢI ĐĂNG", class: "10A09", status: "present" },
-    { id: 319, name: "LÊ PHÚ ĐỊNH", class: "10A09", status: "present" },
-    { id: 320, name: "Y FILA MLÔ YA", class: "10A09", status: "present" },
-    { id: 321, name: "LÊ BÁ HẬU", class: "10A09", status: "present" },
-    { id: 322, name: "NGUYỄN ĐÌNH HIỆP", class: "10A09", status: "present" },
-    { id: 323, name: "TRẦN VĂN THANH HÙNG", class: "10A09", status: "present" },
-    { id: 324, name: "ĐẶNG QUANG KHÁNH", class: "10A09", status: "present" },
-    { id: 325, name: "LƯƠNG NGUYỄN THANH KHOA", class: "10A09", status: "present" },
-    { id: 326, name: "ĐIÊU NGUYỄN TƯỜNG LAM", class: "10A09", status: "present" },
-    { id: 327, name: "TRẦN THÁI BẢO LAM", class: "10A09", status: "present" },
-    { id: 328, name: "ĐOÀN THỊ MAI LINH", class: "10A09", status: "present" },
-    { id: 329, name: "VĂN HÀ LINH", class: "10A09", status: "present" },
-    { id: 330, name: "H LOANH-KBUÔR", class: "10A09", status: "present" },
-    { id: 331, name: "VÕ THỊ TRÚC MAI", class: "10A09", status: "present" },
-    { id: 332, name: "TRẦN MẪN", class: "10A09", status: "present" },
-    { id: 333, name: "H MƠ H ĐỠK", class: "10A09", status: "present" },
-    { id: 334, name: "NGUYỄN NGỌC UYÊN MY", class: "10A09", status: "present" },
-    { id: 335, name: "H' NANG BKRÔNG", class: "10A09", status: "present" },
-    { id: 336, name: "Y NATALY - ÊBAN", class: "10A09", status: "present" },
-    { id: 337, name: "NGUYỄN THIỆN NHÂN", class: "10A09", status: "present" },
-    { id: 338, name: "NGUYỄN YẾN NHƯ", class: "10A09", status: "present" },
-    { id: 339, name: "NGUYỄN TIẾN PHÚ", class: "10A09", status: "present" },
-    { id: 340, name: "PHẠM VĂN PHƯỚC", class: "10A09", status: "present" },
-    { id: 341, name: "TÒNG THỊ BÍCH PHƯƠNG", class: "10A09", status: "present" },
-    { id: 342, name: "LÊ VĂN QUÝ", class: "10A09", status: "present" },
-    { id: 343, name: "Y SINH HĐƠK", class: "10A09", status: "present" },
-    { id: 344, name: "BÙI TẤN TÀI", class: "10A09", status: "present" },
-    { id: 345, name: "H BI TAN NIÊ", class: "10A09", status: "present" },
-    { id: 346, name: "Y THŬ KTŬL", class: "10A09", status: "present" },
-    { id: 347, name: "LÒ VŨ HUYỀN TRÂN", class: "10A09", status: "present" },
-    { id: 348, name: "HUỲNH THỊ TRINH", class: "10A09", status: "present" },
-    { id: 349, name: "NGUYỄN THỊ MỸ TUYỀN", class: "10A09", status: "present" },
-    { id: 350, name: "LƯƠNG HUỲNH QUỐC VỸ", class: "10A09", status: "present" },
-    { id: 351, name: "NGUYỄN HOÀI ANH", class: "11A01", status: "present" },
-    { id: 352, name: "TRẦN THỊ NGỌC ÁNH", class: "11A01", status: "present" },
-    { id: 353, name: "VÕ THỊ KIM ÂN", class: "11A01", status: "present" },
-    { id: 354, name: "NGUYỄN NGỌC MINH CHÂU", class: "11A01", status: "present" },
-    { id: 355, name: "NGUYỄN NGỌC MỸ CHI", class: "11A01", status: "present" },
-    { id: 356, name: "NGUYỄN NGỌC THÀNH CÔNG", class: "11A01", status: "present" },
-    { id: 357, name: "NGUYỄN THỊ KIỀU DIỄM", class: "11A01", status: "present" },
-    { id: 358, name: "VÕ LÊ KIỀU DUYÊN", class: "11A01", status: "present" },
-    { id: 359, name: "NGUYỄN ĐÌNH ĐẠT", class: "11A01", status: "present" },
-    { id: 360, name: "Phạm Thị Yến Hạ", class: "11A01", status: "present" },
-    { id: 361, name: "NGUYỄN LÊ HIẾU", class: "11A01", status: "present" },
-    { id: 362, name: "PHAN THỊ THANH HOA", class: "11A01", status: "present" },
-    { id: 363, name: "HOÀNG MẠNH HUY", class: "11A01", status: "present" },
-    { id: 364, name: "PHAN CẢNH ANH KHÔI", class: "11A01", status: "present" },
-    { id: 365, name: "NGUYỄN TRUNG KIÊN", class: "11A01", status: "present" },
-    { id: 366, name: "NGUYỄN HOÀNG ĐÌNH LUÂN", class: "11A01", status: "present" },
-    { id: 367, name: "ĐẬU THỊ THANH MAI", class: "11A01", status: "present" },
-    { id: 368, name: "HUỲNH THỊ NY NA", class: "11A01", status: "present" },
-    { id: 369, name: "DƯƠNG THỊ KIM NGÂN", class: "11A01", status: "present" },
-    { id: 370, name: "TRẦN YẾN NGÂN", class: "11A01", status: "present" },
-    { id: 371, name: "NGUYỄN HỒNG THẢO NGUYÊN", class: "11A01", status: "present" },
-    { id: 372, name: "PHÙNG BÁ VĨNH NGUYÊN", class: "11A01", status: "present" },
-    { id: 373, name: "ĐOÀN THỊ NGỌC NHI", class: "11A01", status: "present" },
-    { id: 374, name: "NGUYỄN THỊ THẢO NHI", class: "11A01", status: "present" },
-    { id: 375, name: "PHẠM THỊ HỒNG NHUNG", class: "11A01", status: "present" },
-    { id: 376, name: "PHAN HOÀNG GIA NHƯ", class: "11A01", status: "present" },
-    { id: 377, name: "NGUYỄN VĂN PHƯỚC", class: "11A01", status: "present" },
-    { id: 378, name: "ĐOÀN ANH QUANG", class: "11A01", status: "present" },
-    { id: 379, name: "NGUYỄN THỊ NHƯ QUYÊN", class: "11A01", status: "present" },
-    { id: 380, name: "ĐINH THỊ DIỄM QUỲNH", class: "11A01", status: "present" },
-    { id: 381, name: "LƯƠNG NGỌC THIÊN THANH", class: "11A01", status: "present" },
-    { id: 382, name: "NGUYỄN ĐÌNH THÀNH", class: "11A01", status: "present" },
-    { id: 383, name: "MAI QUANG THIÊN", class: "11A01", status: "present" },
-    { id: 384, name: "NGUYỄN NGỌC BẢO THY", class: "11A01", status: "present" },
-    { id: 385, name: "TRẦN QUỲNH THY", class: "11A01", status: "present" },
-    { id: 386, name: "NGUYỄN NGỌC HUYỀN TRANG", class: "11A01", status: "present" },
-    { id: 387, name: "NGUYỄN DƯƠNG BẢO TRÂN", class: "11A01", status: "present" },
-    { id: 388, name: "ĐỖ VĂN TRƯỜNG", class: "11A01", status: "present" },
-    { id: 389, name: "ĐẶNG LÊ MINH TUẤN", class: "11A01", status: "present" },
-    { id: 390, name: "NGUYỄN ANH TUẤN", class: "11A01", status: "present" },
-    { id: 391, name: "NGUYỄN MẠNH TUẤN", class: "11A01", status: "present" },
-    { id: 392, name: "VƯƠNG THANH TÙNG", class: "11A01", status: "present" },
-    { id: 393, name: "LÊ TRƯỜNG THU UYÊN", class: "11A01", status: "present" },
-    { id: 394, name: "HỒ THỊ TƯỜNG VI", class: "11A01", status: "present" },
-    { id: 395, name: "VŨ DUY VINH", class: "11A01", status: "present" },
-    { id: 396, name: "HOÀNG LÊ VY", class: "11A01", status: "present" },
-    { id: 397, name: "NGUYỄN TRÚC UYÊN VY", class: "11A01", status: "present" },
-    { id: 398, name: "TRẦN NGUYỄN THẢO AN", class: "11A02", status: "present" },
-    { id: 399, name: "NGUYỄN HOÀNG TUẤN ANH", class: "11A02", status: "present" },
-    { id: 400, name: "NGUYỄN HUỲNH PHƯƠNG ANH", class: "11A02", status: "present" },
-    { id: 401, name: "NGUYỄN PHẠM TUẤN ANH", class: "11A02", status: "present" },
-    { id: 402, name: "ĐỖ THỊ TUYẾT CHI", class: "11A02", status: "present" },
-    { id: 403, name: "VŨ NGỌC HUYỀN DIỆU", class: "11A02", status: "present" },
-    { id: 404, name: "LÙ HOÀNG DUẨN", class: "11A02", status: "present" },
-    { id: 405, name: "LÊ ANH DŨNG", class: "11A02", status: "present" },
-    { id: 406, name: "HOÀNG THỊ THÙY DUYÊN", class: "11A02", status: "present" },
-    { id: 407, name: "NGUYỄN BẢO ĐẠT", class: "11A02", status: "present" },
-    { id: 408, name: "NGUYỄN HỮU ĐẠT", class: "11A02", status: "present" },
-    { id: 409, name: "TÔ MẠNH ĐỨC", class: "11A02", status: "present" },
-    { id: 410, name: "VŨ NGỌC ANH ĐỨC", class: "11A02", status: "present" },
-    { id: 411, name: "NGUYỄN THỊ TRÚC HÀ", class: "11A02", status: "present" },
-    { id: 412, name: "MAI HỒNG HẢI", class: "11A02", status: "present" },
-    { id: 413, name: "BÙI QUANG HUY", class: "11A02", status: "present" },
-    { id: 414, name: "LÒ VŨ GIA HUY", class: "11A02", status: "present" },
-    { id: 415, name: "PHẠM GIA HUY", class: "11A02", status: "present" },
-    { id: 416, name: "LƯU THỊ NGỌC LAN", class: "11A02", status: "present" },
-    { id: 417, name: "NGUYỄN NGỌC KHÁNH LINH", class: "11A02", status: "present" },
-    { id: 418, name: "NGUYỄN THỊ HOÀNG LINH", class: "11A02", status: "present" },
-    { id: 419, name: "TRẦN VĂN LONG", class: "11A02", status: "present" },
-    { id: 420, name: "KTUL - YÃ - Y LUÂN", class: "11A02", status: "present" },
-    { id: 421, name: "TRẦN THỊ XUÂN MAI", class: "11A02", status: "present" },
-    { id: 422, name: "LÊ NGỌC TRÀ MY", class: "11A02", status: "present" },
-    { id: 423, name: "VƯƠNG THỊ TRÀ MY", class: "11A02", status: "present" },
-    { id: 424, name: "ĐẶNG BẢO NGỌC", class: "11A02", status: "present" },
-    { id: 425, name: "PHAN BẢO NGỌC", class: "11A02", status: "present" },
-    { id: 426, name: "LƯU NGUYỄN ĐÌNH NGUYÊN", class: "11A02", status: "present" },
-    { id: 427, name: "LÊ THANH PHƯỚC", class: "11A02", status: "present" },
-    { id: 428, name: "NGUYỄN THANH QUÂN", class: "11A02", status: "present" },
-    { id: 429, name: "NGUYỄN HỒNG SƠN", class: "11A02", status: "present" },
-    { id: 430, name: "VĂN HỮU TÀI", class: "11A02", status: "present" },
-    { id: 431, name: "NGUYỄN TRUNG THIỆN", class: "11A02", status: "present" },
-    { id: 432, name: "LÊ NGUYỄN MINH THƯ", class: "11A02", status: "present" },
-    { id: 433, name: "NGUYỄN NGỌC ANH THƯ", class: "11A02", status: "present" },
-    { id: 434, name: "NGUYỄN THỊ MINH THƯ", class: "11A02", status: "present" },
-    { id: 435, name: "PHẠM THỊ ANH THƯ", class: "11A02", status: "present" },
-    { id: 436, name: "TRẦN THỊ ANH THƯ", class: "11A02", status: "present" },
-    { id: 437, name: "LÊ VĂN THƯƠNG", class: "11A02", status: "present" },
-    { id: 438, name: "PHAN SỸ TIẾNG", class: "11A02", status: "present" },
-    { id: 439, name: "PHÙNG THỊ THÙY TRANG", class: "11A02", status: "present" },
-    { id: 440, name: "TRẦN NGUYỄN BẢO TRÂN", class: "11A02", status: "present" },
-    { id: 441, name: "TRƯƠNG THỊ TRIỀU", class: "11A02", status: "present" },
-    { id: 442, name: "LÊ THỊ KIỀU TRINH", class: "11A02", status: "present" },
-    { id: 443, name: "NGUYỄN HOÀNG QUAN VINH", class: "11A02", status: "present" },
-    { id: 444, name: "MAI HOÀNG THẾ VƯƠNG", class: "11A02", status: "present" },
-    { id: 445, name: "NGUYỄN THỊ THANH XUÂN", class: "11A02", status: "present" },
-    { id: 446, name: "NGUYỄN NGỌC PHƯƠNG ANH", class: "11A03", status: "present" },
-    { id: 447, name: "ĐINH GIA BẢO", class: "11A03", status: "present" },
-    { id: 448, name: "NGUYỄN THÀNH ĐẠT", class: "11A03", status: "present" },
-    { id: 449, name: "NGUYỄN THỊ HƯƠNG GIANG", class: "11A03", status: "present" },
-    { id: 450, name: "LÊ THỊ THU HÀ", class: "11A03", status: "present" },
-    { id: 451, name: "LÊ XUÂN HÀ", class: "11A03", status: "present" },
-    { id: 452, name: "NGUYỄN THỊ THÚY HẰNG", class: "11A03", status: "present" },
-    { id: 453, name: "TRẦN THỊ THÚY HẰNG", class: "11A03", status: "present" },
-    { id: 454, name: "TRẦN GIA HÂN", class: "11A03", status: "present" },
-    { id: 455, name: "Y HE HĐƠK", class: "11A03", status: "present" },
-    { id: 456, name: "Y HIỂN BUÔN YĂ", class: "11A03", status: "present" },
-    { id: 457, name: "NGUYỄN THANH HOA", class: "11A03", status: "present" },
-    { id: 458, name: "NGÔ NGUYỄN VIỆT HOÀN", class: "11A03", status: "present" },
-    { id: 459, name: "NGUYỄN MINH ĐĂNG HOÀNG", class: "11A03", status: "present" },
-    { id: 460, name: "VŨ NHẬT KHANG", class: "11A03", status: "present" },
-    { id: 461, name: "Y KHANG NIÊ", class: "11A03", status: "present" },
-    { id: 462, name: "Dương Đăng Khoa", class: "11A03", status: "present" },
-    { id: 463, name: "PHẠM ĐĂNG KHÔI", class: "11A03", status: "present" },
-    { id: 464, name: "NGUYỄN THỊ LÀNH", class: "11A03", status: "present" },
-    { id: 465, name: "HÀ HOÀNG NGỌC LINH", class: "11A03", status: "present" },
-    { id: 466, name: "H'LIVEA- BYĂ", class: "11A03", status: "present" },
-    { id: 467, name: "HUỲNH UY LONG", class: "11A03", status: "present" },
-    { id: 468, name: "NGÔ GIA MI", class: "11A03", status: "present" },
-    { id: 469, name: "NGUYỄN THỊ THẢO MY", class: "11A03", status: "present" },
-    { id: 470, name: "NGUYỄN THỊ THÙY MY", class: "11A03", status: "present" },
-    { id: 471, name: "VÕ THỊ TRÀ MY", class: "11A03", status: "present" },
-    { id: 472, name: "LÊ NGỌC NGUYÊN", class: "11A03", status: "present" },
-    { id: 473, name: "PHẠM THỊ ÁNH NGUYỆT", class: "11A03", status: "present" },
-    { id: 474, name: "LÊ THỊ ANH NHƯ", class: "11A03", status: "present" },
-    { id: 475, name: "NGUYỄN THỊ MỸ PHƯỢNG", class: "11A03", status: "present" },
-    { id: 476, name: "PHAN TRUNG QUYỀN", class: "11A03", status: "present" },
-    { id: 477, name: "PHAN HOÀNG ANH THÁI", class: "11A03", status: "present" },
-    { id: 478, name: "NGUYỄN CHÍ THÀNH", class: "11A03", status: "present" },
-    { id: 479, name: "NGUYỄN PHƯƠNG THẢO", class: "11A03", status: "present" },
-    { id: 480, name: "BÙI THỊ MINH THƯ", class: "11A03", status: "present" },
-    { id: 481, name: "THÁI TRẦN ANH THƯ", class: "11A03", status: "present" },
-    { id: 482, name: "LÊ NGUYỄN HUYỀN TRANG", class: "11A03", status: "present" },
-    { id: 483, name: "NGUYỄN ĐÀO NGỌC TRÂM", class: "11A03", status: "present" },
-    { id: 484, name: "NGUYỄN NGỌC BẢO AN", class: "11A04", status: "present" },
-    { id: 485, name: "ĐỖ NGỌC KIM ANH", class: "11A04", status: "present" },
-    { id: 486, name: "LƯƠNG HÀ KIỀU ANH", class: "11A04", status: "present" },
-    { id: 487, name: "NGUYỄN THỊ TÚ ANH", class: "11A04", status: "present" },
-    { id: 488, name: "PHẠM CHÂU PHƯƠNG ANH", class: "11A04", status: "present" },
-    { id: 489, name: "PHẠM QUỲNH ANH", class: "11A04", status: "present" },
-    { id: 490, name: "BÙI MINH BẢO", class: "11A04", status: "present" },
-    { id: 491, name: "HOÀNG GIA BẢO", class: "11A04", status: "present" },
-    { id: 492, name: "NGUYỄN TRÍ BẢO", class: "11A04", status: "present" },
-    { id: 493, name: "PHẠM GIA BẢO", class: "11A04", status: "present" },
-    { id: 494, name: "LÊ ĐỨC TÂM BÌNH", class: "11A04", status: "present" },
-    { id: 495, name: "H' DOAI NIÊ", class: "11A04", status: "present" },
-    { id: 496, name: "HOÀNG NGỌC DŨNG", class: "11A04", status: "present" },
-    { id: 497, name: "LÊ QUỐC DUY", class: "11A04", status: "present" },
-    { id: 498, name: "LÊ THỊ HOÀNG DUYÊN", class: "11A04", status: "present" },
-    { id: 499, name: "HUỲNH TIẾN ĐẠT", class: "11A04", status: "present" },
-    { id: 500, name: "DƯƠNG THỊ NGỌC HÂN", class: "11A04", status: "present" },
-    { id: 501, name: "TRƯƠNG HỒNG HÂN", class: "11A04", status: "present" },
-    { id: 502, name: "MAI QUỐC HUY", class: "11A04", status: "present" },
-    { id: 503, name: "NGUYỄN DUY KHOA", class: "11A04", status: "present" },
-    { id: 504, name: "HÀ NHẬT LỆ", class: "11A04", status: "present" },
-    { id: 505, name: "VÕ THÀNH LONG", class: "11A04", status: "present" },
-    { id: 506, name: "HUỲNH THỊ TRÚC LY", class: "11A04", status: "present" },
-    { id: 507, name: "ĐẬU HOÀNG MINH", class: "11A04", status: "present" },
-    { id: 508, name: "PHAN THỊ KIM NGÂN", class: "11A04", status: "present" },
-    { id: 509, name: "TRẦN LÊ YẾN NHI", class: "11A04", status: "present" },
-    { id: 510, name: "H NIT A DRƠNG", class: "11A04", status: "present" },
-    { id: 511, name: "HOÀNG MẠNH QUÂN", class: "11A04", status: "present" },
-    { id: 512, name: "NGUYỄN DANH TÀI", class: "11A04", status: "present" },
-    { id: 513, name: "LÊ THỊ BẢO THI", class: "11A04", status: "present" },
-    { id: 514, name: "ĐỖ XUÂN THIỆN", class: "11A04", status: "present" },
-    { id: 515, name: "TỐNG THỊ THANH THỦY", class: "11A04", status: "present" },
-    { id: 516, name: "HUỲNH LÊ MINH THƯ", class: "11A04", status: "present" },
-    { id: 517, name: "HUỲNH TẤN THỨC", class: "11A04", status: "present" },
-    { id: 518, name: "LÊ TRƯƠNG TIN", class: "11A04", status: "present" },
-    { id: 519, name: "NGUYỄN NGỌC BẢO TRÂM", class: "11A04", status: "present" },
-    { id: 520, name: "NGUYỄN THÙY TRÂM", class: "11A04", status: "present" },
-    { id: 521, name: "VÕ THỊ KIỀU TRINH", class: "11A04", status: "present" },
-    { id: 522, name: "ĐINH THỊ THANH TRÚC", class: "11A04", status: "present" },
-    { id: 523, name: "NGUYỄN LÊ HOÀI TRÚC", class: "11A04", status: "present" },
-    { id: 524, name: "TRẦN ĐỖ MỸ VÂN", class: "11A04", status: "present" },
-    { id: 525, name: "HỒ VĂN XUÂN", class: "11A04", status: "present" },
-    { id: 526, name: "LÊ THỊ KIM YẾN", class: "11A04", status: "present" },
-    { id: 527, name: "H' AN ÊBAN", class: "11A05", status: "present" },
-    { id: 528, name: "LÊ QUÝ CHÂU", class: "11A05", status: "present" },
-    { id: 529, name: "H' CHIN NA BYĂ", class: "11A05", status: "present" },
-    { id: 530, name: "CAO TIẾN ĐẠT", class: "11A05", status: "present" },
-    { id: 531, name: "NGUYỄN THÀNH ĐÔNG", class: "11A05", status: "present" },
-    { id: 532, name: "NGUYỄN KHẮC ĐỨC", class: "11A05", status: "present" },
-    { id: 533, name: "PHAN THỊ KIỀU GIANG", class: "11A05", status: "present" },
-    { id: 534, name: "ĐẬU VIỆT HÀ", class: "11A05", status: "present" },
-    { id: 535, name: "NGUYỄN HOÀNG HIỆP", class: "11A05", status: "present" },
-    { id: 536, name: "LÊ MINH HIẾU", class: "11A05", status: "present" },
-    { id: 537, name: "LÊ VIẾT MINH HIẾU", class: "11A05", status: "present" },
-    { id: 538, name: "H HIP BYĂ", class: "11A05", status: "present" },
-    { id: 539, name: "PHAN THỊ THU HOÀI", class: "11A05", status: "present" },
-    { id: 540, name: "PHAN TRẦN BẢO HUY", class: "11A05", status: "present" },
-    { id: 541, name: "VÕ TUẤN KIỆT", class: "11A05", status: "present" },
-    { id: 542, name: "HỒ KHÁNH LINH", class: "11A05", status: "present" },
-    { id: 543, name: "NGUYỄN GIA LONG", class: "11A05", status: "present" },
-    { id: 544, name: "H LUYNH NIÊ", class: "11A05", status: "present" },
-    { id: 545, name: "Y - LY CHUN - KNUL", class: "11A05", status: "present" },
-    { id: 546, name: "H MĂNG BUÔN KRÔNG", class: "11A05", status: "present" },
-    { id: 547, name: "VÕ HOÀNG THẢO MY", class: "11A05", status: "present" },
-    { id: 548, name: "LÊ NGỌC BẢO NAM", class: "11A05", status: "present" },
-    { id: 549, name: "VÕ THÙY NHIÊN", class: "11A05", status: "present" },
-    { id: 550, name: "HUỲNH THỊ PHƯỚC NHƯ", class: "11A05", status: "present" },
-    { id: 551, name: "NGUYỄN ANH QUÂN", class: "11A05", status: "present" },
-    { id: 552, name: "VÕ THỊ NGỌC QUYÊN", class: "11A05", status: "present" },
-    { id: 553, name: "H RÍ BYĂ", class: "11A05", status: "present" },
-    { id: 554, name: "HUỲNH THỊ PHƯỚC THUẬN", class: "11A05", status: "present" },
-    { id: 555, name: "NGUYỄN TRẦN THANH THY", class: "11A05", status: "present" },
-    { id: 556, name: "NGUYỄN THỊ THU TRANG", class: "11A05", status: "present" },
-    { id: 557, name: "MAI THỊ BÍCH TRÂM", class: "11A05", status: "present" },
-    { id: 558, name: "NGUYỄN MAI HUYỀN TRÂN", class: "11A05", status: "present" },
-    { id: 559, name: "HÀ MINH TRIẾT", class: "11A05", status: "present" },
-    { id: 560, name: "HUỲNH THỊ PHƯỚC TRỤ", class: "11A05", status: "present" },
-    { id: 561, name: "Y VA LEN BYĂ ÊBAN", class: "11A05", status: "present" },
-    { id: 562, name: "ĐỖ NGUYỄN THẢO VY", class: "11A05", status: "present" },
-    { id: 563, name: "NGUYỄN DIỆU ANH", class: "11A06", status: "present" },
-    { id: 564, name: "NGUYỄN ĐỖ HOÀNG ANH", class: "11A06", status: "present" },
-    { id: 565, name: "QUANG NHẬT ANH", class: "11A06", status: "present" },
-    { id: 566, name: "NGUYỄN HOÀNG DUY", class: "11A06", status: "present" },
-    { id: 567, name: "ĐOÀN THANH HẰNG", class: "11A06", status: "present" },
-    { id: 568, name: "LÊ THỊ NGỌC HÂN", class: "11A06", status: "present" },
-    { id: 569, name: "PHẠM HUY HOÀNG", class: "11A06", status: "present" },
-    { id: 570, name: "NGUYỄN PHI HÙNG", class: "11A06", status: "present" },
-    { id: 571, name: "LÊ THỊ MAI HƯƠNG", class: "11A06", status: "present" },
-    { id: 572, name: "TRẦN BẢO KHANG", class: "11A06", status: "present" },
-    { id: 573, name: "PHẠM NGỌC ANH KHOA", class: "11A06", status: "present" },
-    { id: 574, name: "H' LÊ BYĂ", class: "11A06", status: "present" },
-    { id: 575, name: "NGUYỄN MAI LINH", class: "11A06", status: "present" },
-    { id: 576, name: "TRẦN NGỌC BẢO LONG", class: "11A06", status: "present" },
-    { id: 577, name: "H NANG ADRƠNG", class: "11A06", status: "present" },
-    { id: 578, name: "H' NA RI KTUL", class: "11A06", status: "present" },
-    { id: 579, name: "NGUYỄN VY BẢO NGỌC", class: "11A06", status: "present" },
-    { id: 580, name: "VŨ YẾN NHI", class: "11A06", status: "present" },
-    { id: 581, name: "H NHƯ BYĂ", class: "11A06", status: "present" },
-    { id: 582, name: "HOÀNG VĂN ANH QUÂN", class: "11A06", status: "present" },
-    { id: 583, name: "LÊ ANH QUỐC", class: "11A06", status: "present" },
-    { id: 584, name: "TRỊNH ĐÌNH TÀI", class: "11A06", status: "present" },
-    { id: 585, name: "TRƯƠNG THỊ MỸ THANH", class: "11A06", status: "present" },
-    { id: 586, name: "NGUYỄN DUY THÀNH", class: "11A06", status: "present" },
-    { id: 587, name: "HUỲNH THỊ PHƯƠNG THẢO", class: "11A06", status: "present" },
-    { id: 588, name: "ĐÀO XUÂN THỊNH", class: "11A06", status: "present" },
-    { id: 589, name: "NGUYỄN NGỌC THỊNH", class: "11A06", status: "present" },
-    { id: 590, name: "TRỊNH XUÂN THƯ", class: "11A06", status: "present" },
-    { id: 591, name: "Y TINH BYĂ", class: "11A06", status: "present" },
-    { id: 592, name: "VŨ HOÀI NHƯ TỐ", class: "11A06", status: "present" },
-    { id: 593, name: "LÊ HUYỀN TRANG", class: "11A06", status: "present" },
-    { id: 594, name: "PHẠM THỊ MỸ TRANG", class: "11A06", status: "present" },
-    { id: 595, name: "H TRĂM BYĂ", class: "11A06", status: "present" },
-    { id: 596, name: "LÒ THỊ NGỌC TRINH", class: "11A06", status: "present" },
-    { id: 597, name: "NGUYỄN THỊ KIỀU TRINH", class: "11A06", status: "present" },
-    { id: 598, name: "TRỊNH THÙY PHƯƠNG UYÊN", class: "11A06", status: "present" },
-    { id: 599, name: "CHU NGUYỄN PHÚC VINH", class: "11A06", status: "present" },
-    { id: 600, name: "NGUYỄN THẾ VINH", class: "11A06", status: "present" },
-    { id: 601, name: "HOÀNG THỊ NHƯ Ý", class: "11A06", status: "present" },
-    { id: 602, name: "HOÀNG VĂN QUỐC ANH", class: "11A07", status: "present" },
-    { id: 603, name: "TRƯƠNG THỊ NGỌC ANH", class: "11A07", status: "present" },
-    { id: 604, name: "TRỊNH AN BANG", class: "11A07", status: "present" },
-    { id: 605, name: "H' BIAN ÊBAN", class: "11A07", status: "present" },
-    { id: 606, name: "VŨ MAI DƯƠNG", class: "11A07", status: "present" },
-    { id: 607, name: "MAI HOÀNG ĐÔ", class: "11A07", status: "present" },
-    { id: 608, name: "TRƯƠNG ĐÌNH ĐỘ", class: "11A07", status: "present" },
-    { id: 609, name: "CHÂU HỒ GIA HÂN", class: "11A07", status: "present" },
-    { id: 610, name: "NGÔ GIA HÂN", class: "11A07", status: "present" },
-    { id: 611, name: "NGUYỄN TRUNG HÒA", class: "11A07", status: "present" },
-    { id: 612, name: "LƯỜNG TÀI HOÀNG", class: "11A07", status: "present" },
-    { id: 613, name: "PHẠM CHÍ HOÀNG", class: "11A07", status: "present" },
-    { id: 614, name: "DƯƠNG QUANG HÙNG", class: "11A07", status: "present" },
-    { id: 615, name: "ĐINH THỊ PHƯƠNG HUYỀN", class: "11A07", status: "present" },
-    { id: 616, name: "HUỲNH TRUNG KIỆT", class: "11A07", status: "present" },
-    { id: 617, name: "PHẠM LÊ ANH KIỆT", class: "11A07", status: "present" },
-    { id: 618, name: "ĐỖ DIỆU LINH", class: "11A07", status: "present" },
-    { id: 619, name: "ĐỖ KHẢ LINH", class: "11A07", status: "present" },
-    { id: 620, name: "NGUYỄN QUANG LONG", class: "11A07", status: "present" },
-    { id: 621, name: "VÕ HOÀI MỊ", class: "11A07", status: "present" },
-    { id: 622, name: "H - MI DIN - KBUÔR", class: "11A07", status: "present" },
-    { id: 623, name: "ĐINH NGUYỄN THANH TRÀ MY", class: "11A07", status: "present" },
-    { id: 624, name: "NGUYỄN KIỀU MY", class: "11A07", status: "present" },
-    { id: 625, name: "NGUYỄN THỊ THẢO MY", class: "11A07", status: "present" },
-    { id: 626, name: "NGUYỄN THU NGA", class: "11A07", status: "present" },
-    { id: 627, name: "TRẦN THỊ DIỄM NGÂN", class: "11A07", status: "present" },
-    { id: 628, name: "H' NGÔI KTUL", class: "11A07", status: "present" },
-    { id: 629, name: "LÊ THỊ TUYẾT NHI", class: "11A07", status: "present" },
-    { id: 630, name: "NGUYỄN TRANG NHI", class: "11A07", status: "present" },
-    { id: 631, name: "NGUYỄN THỊ DIỄM NHƯ", class: "11A07", status: "present" },
-    { id: 632, name: "NGUYỄN THỊ THU NHƯ", class: "11A07", status: "present" },
-    { id: 633, name: "NGUYỄN KHẢ NI", class: "11A07", status: "present" },
-    { id: 634, name: "H NIAN BYĂ", class: "11A07", status: "present" },
-    { id: 635, name: "H' NIN - HĐƠK", class: "11A07", status: "present" },
-    { id: 636, name: "NGUYỄN GIA PHÚ", class: "11A07", status: "present" },
-    { id: 637, name: "VÕ THANH QUANG", class: "11A07", status: "present" },
-    { id: 638, name: "LÊ VĂN QUÝ", class: "11A07", status: "present" },
-    { id: 639, name: "ĐỖ NGỌC TÚ QUỲNH", class: "11A07", status: "present" },
-    { id: 640, name: "Y SU KIN Ê BAN", class: "11A07", status: "present" },
-    { id: 641, name: "NGUYỄN NGỌC THẢO", class: "11A07", status: "present" },
-    { id: 642, name: "Y THUYẾT BYĂ", class: "11A07", status: "present" },
-    { id: 643, name: "NGUYỄN BẢO ANH THƯ", class: "11A07", status: "present" },
-    { id: 644, name: "TRẦN MINH THƯ", class: "11A07", status: "present" },
-    { id: 645, name: "PHẠM THỊ BẢO TRÂM", class: "11A07", status: "present" },
-    { id: 646, name: "NGUYỄN ANH TUẤN KBUÔR", class: "11A07", status: "present" },
-    { id: 647, name: "LÊ VĂN THANH TÙNG", class: "11A07", status: "present" },
-    { id: 648, name: "PHẠM TRỊNH KỲ VÂN", class: "11A07", status: "present" },
-    { id: 649, name: "TẠ NHẬT AN", class: "11A08", status: "present" },
-    { id: 650, name: "HOÀNG THỊ TRÂM ANH", class: "11A08", status: "present" },
-    { id: 651, name: "HOÀNG TRỊNH VIỆT ANH", class: "11A08", status: "present" },
-    { id: 652, name: "HÀ NGỌC ÁNH", class: "11A08", status: "present" },
-    { id: 653, name: "TRƯƠNG NGỌC ÁNH", class: "11A08", status: "present" },
-    { id: 654, name: "NGUYỄN BẢO CHÂU", class: "11A08", status: "present" },
-    { id: 655, name: "QUÀNG THỊ LINH CHI", class: "11A08", status: "present" },
-    { id: 656, name: "NGUYỄN THI DUNG", class: "11A08", status: "present" },
-    { id: 657, name: "H DUYỆT - NIÊ", class: "11A08", status: "present" },
-    { id: 658, name: "NGUYỄN NHÃ TRÚC ĐAN", class: "11A08", status: "present" },
-    { id: 659, name: "Y ĐĂNG BYĂ", class: "11A08", status: "present" },
-    { id: 660, name: "Y HẢI - BYĂ", class: "11A08", status: "present" },
-    { id: 661, name: "LƯƠNG HÒA HIỆP", class: "11A08", status: "present" },
-    { id: 662, name: "TRẦN GIA BÁCH HỢP", class: "11A08", status: "present" },
-    { id: 663, name: "QUÀNG THỊ KIM HUỆ", class: "11A08", status: "present" },
-    { id: 664, name: "TRẦN ANH HUY", class: "11A08", status: "present" },
-    { id: 665, name: "PHẠM NGUYỄN GIA HƯNG", class: "11A08", status: "present" },
-    { id: 666, name: "Y LA WIN NIÊ KDĂM", class: "11A08", status: "present" },
-    { id: 667, name: "NÔNG THỊ MỸ LINH", class: "11A08", status: "present" },
-    { id: 668, name: "TRƯƠNG HOÀNG THÙY LINH", class: "11A08", status: "present" },
-    { id: 669, name: "TRỊNH TRẦN KHÁNH LY", class: "11A08", status: "present" },
-    { id: 670, name: "TÁN HOÀNG DUY MINH", class: "11A08", status: "present" },
-    { id: 671, name: "PHẠM HOÀNG THẢO MY", class: "11A08", status: "present" },
-    { id: 672, name: "MA THỊ YẾN NGỌC", class: "11A08", status: "present" },
-    { id: 673, name: "TRIỆU TRUNG NGUYÊN", class: "11A08", status: "present" },
-    { id: 674, name: "VÕ THỊ YẾN NHI", class: "11A08", status: "present" },
-    { id: 675, name: "NGUYỄN THỊ HỒNG NHUNG", class: "11A08", status: "present" },
-    { id: 676, name: "H - PHIÊN NIÊ", class: "11A08", status: "present" },
-    { id: 677, name: "LƯU QUANG PHÚ", class: "11A08", status: "present" },
-    { id: 678, name: "KHƯƠNG DUY PHÚC", class: "11A08", status: "present" },
-    { id: 679, name: "HỒ NGUYỄN Y PHỤNG", class: "11A08", status: "present" },
-    { id: 680, name: "MÈ THỊ QUYẾT", class: "11A08", status: "present" },
-    { id: 681, name: "HUỲNH THỊ KIM SANG", class: "11A08", status: "present" },
-    { id: 682, name: "VÕ CHÍ THÀNH", class: "11A08", status: "present" },
-    { id: 683, name: "ĐỖ HOÀNG TOÀN THẮNG", class: "11A08", status: "present" },
-    { id: 684, name: "NGUYỄN THỊ HOÀI THƯƠNG", class: "11A08", status: "present" },
-    { id: 685, name: "LƯƠNG HOÀNG NGỌC TIÊN", class: "11A08", status: "present" },
-    { id: 686, name: "PHẠM HUYỀN TRANG", class: "11A08", status: "present" },
-    { id: 687, name: "NGUYỄN NGỌC BẢO TRÂM", class: "11A08", status: "present" },
-    { id: 688, name: "NGUYỄN THỊ NGỌC TRÂM", class: "11A08", status: "present" },
-    { id: 689, name: "Y ÚT - BKRÔNG", class: "11A08", status: "present" },
-    { id: 690, name: "VÕ HÀ YẾN VI", class: "11A08", status: "present" },
-    { id: 691, name: "PHẠM HỒNG VIỆT", class: "11A08", status: "present" },
-    { id: 692, name: "LÊ HÀ VY", class: "11A08", status: "present" },
-    { id: 693, name: "NGUYỄN THỊ NHƯ Ý", class: "11A08", status: "present" },
-    { id: 694, name: "H' YIA NIÊ", class: "11A08", status: "present" },
-    { id: 695, name: "LÊ THANH AN", class: "11A09", status: "present" },
-    { id: 696, name: "NGUYỄN ĐÌNH TUẤN ANH", class: "11A09", status: "present" },
-    { id: 697, name: "NGUYỄN HOÀNG MAI ANH", class: "11A09", status: "present" },
-    { id: 698, name: "Y' ANH MLÔ BYĂ", class: "11A09", status: "present" },
-    { id: 699, name: "TRẦN LÊ HOÀI BẢO", class: "11A09", status: "present" },
-    { id: 700, name: "NGUYỄN THỊ THU BÌNH", class: "11A09", status: "present" },
-    { id: 701, name: "Y ČHÊNG HĐƠK", class: "11A09", status: "present" },
-    { id: 702, name: "H DUĐA - HĐƠK", class: "11A09", status: "present" },
-    { id: 703, name: "VŨ THỊ THÙY DUNG", class: "11A09", status: "present" },
-    { id: 704, name: "NGUYỄN THY ĐAN", class: "11A09", status: "present" },
-    { id: 705, name: "NGUYỄN NGỌC HỒNG ĐÀO", class: "11A09", status: "present" },
-    { id: 706, name: "HUỲNH TẤN ĐẠT", class: "11A09", status: "present" },
-    { id: 707, name: "MAI NGỌC THÚY HẰNG", class: "11A09", status: "present" },
-    { id: 708, name: "TẠ THÚY HẰNG", class: "11A09", status: "present" },
-    { id: 709, name: "MAI THỊ KIM HIỀN", class: "11A09", status: "present" },
-    { id: 710, name: "NGUYỄN DUY KHÁNH", class: "11A09", status: "present" },
-    { id: 711, name: "LÝ DIỆU LINH BUÔN YĂ", class: "11A09", status: "present" },
-    { id: 712, name: "PHẠM TRẦN BẢO LY", class: "11A09", status: "present" },
-    { id: 713, name: "TRƯƠNG THỊ NGỌC MAI", class: "11A09", status: "present" },
-    { id: 714, name: "NGÔ TRẦN HUYỀN MY", class: "11A09", status: "present" },
-    { id: 715, name: "HỒ BẢO NGUYÊN", class: "11A09", status: "present" },
-    { id: 716, name: "LÊ THỊ YẾN NHI", class: "11A09", status: "present" },
-    { id: 717, name: "VŨ NGỌC YẾN NHI", class: "11A09", status: "present" },
-    { id: 718, name: "H' NHOEL BKRÔNG", class: "11A09", status: "present" },
-    { id: 719, name: "H' NI SA NIÊ", class: "11A09", status: "present" },
-    { id: 720, name: "LÊ KIỀU OANH NIÊ", class: "11A09", status: "present" },
-    { id: 721, name: "NGUYỄN VĂN QUẢNG", class: "11A09", status: "present" },
-    { id: 722, name: "NIÊ ANH QUÂN", class: "11A09", status: "present" },
-    { id: 723, name: "HOÀNG NGUYỄN NGỌC QUYÊN", class: "11A09", status: "present" },
-    { id: 724, name: "NGUYỄN HOÀNG QUYÊN", class: "11A09", status: "present" },
-    { id: 725, name: "PHẠM THỊ HOÀNG QUYÊN", class: "11A09", status: "present" },
-    { id: 726, name: "TRẦN THANH THẮNG", class: "11A09", status: "present" },
-    { id: 727, name: "H' THI KTUL", class: "11A09", status: "present" },
-    { id: 728, name: "NGUYỄN HÀ ANH THƯ", class: "11A09", status: "present" },
-    { id: 729, name: "NGUYỄN VĂN TRIỆU", class: "11A09", status: "present" },
-    { id: 730, name: "NGUYỄN QUANG TRUNG", class: "11A09", status: "present" },
-    { id: 731, name: "BẠCH VĂN TRƯỜNG", class: "11A09", status: "present" },
-    { id: 732, name: "NGUYỄN NGỌC LONG VŨ", class: "11A09", status: "present" },
-    { id: 733, name: "NGUYỄN BẢO DUY AN", class: "12A01", status: "present" },
-    { id: 734, name: "HOÀNG HÀ ANH", class: "12A01", status: "present" },
-    { id: 735, name: "NGUYỄN CHÂU QUẾ ANH", class: "12A01", status: "present" },
-    { id: 736, name: "TRƯƠNG HOÀNG ANH", class: "12A01", status: "present" },
-    { id: 737, name: "VŨ THỊ HOÀNG ANH", class: "12A01", status: "present" },
-    { id: 738, name: "ĐỖ NGỌC GIA BẢO", class: "12A01", status: "present" },
-    { id: 739, name: "NGUYỄN THÁI BẢO", class: "12A01", status: "present" },
-    { id: 740, name: "NGUYỄN QUỐC CƯỜNG", class: "12A01", status: "present" },
-    { id: 741, name: "TRẦN THỊ DIỆU", class: "12A01", status: "present" },
-    { id: 742, name: "NGÔ ĐỨC DŨNG", class: "12A01", status: "present" },
-    { id: 743, name: "TRẦN LÊ DUY", class: "12A01", status: "present" },
-    { id: 744, name: "LÊ HỮU ĐẠT", class: "12A01", status: "present" },
-    { id: 745, name: "DƯƠNG NGUYỄN HẢI ĐIỆP", class: "12A01", status: "present" },
-    { id: 746, name: "HOÀNG NAM GIANG", class: "12A01", status: "present" },
-    { id: 747, name: "TRẦN THỊ THANH HÀ", class: "12A01", status: "present" },
-    { id: 748, name: "PHẠM LÊ MAI HÂN", class: "12A01", status: "present" },
-    { id: 749, name: "NGUYỄN VĂN HUY HOÀNG", class: "12A01", status: "present" },
-    { id: 750, name: "ĐÀM LÊ HOÀNG KHANG", class: "12A01", status: "present" },
-    { id: 751, name: "NGUYỄN TRUNG KIÊN", class: "12A01", status: "present" },
-    { id: 752, name: "PHẠM THỊ NGỌC LINH", class: "12A01", status: "present" },
-    { id: 753, name: "LÊ PHẠM THÀNH LONG", class: "12A01", status: "present" },
-    { id: 754, name: "NGUYỄN THỊ NGỌC MAI", class: "12A01", status: "present" },
-    { id: 755, name: "VŨ THỊ TRÀ MY", class: "12A01", status: "present" },
-    { id: 756, name: "NGUYỄN THỊ BÍCH NGÂN", class: "12A01", status: "present" },
-    { id: 757, name: "TRẦN THU NGÂN", class: "12A01", status: "present" },
-    { id: 758, name: "ĐỖ NGUYỄN KIM NGUYÊN", class: "12A01", status: "present" },
-    { id: 759, name: "TRỊNH MAI NGUYỆT NHI", class: "12A01", status: "present" },
-    { id: 760, name: "TRẦN QUỲNH NHƯ", class: "12A01", status: "present" },
-    { id: 761, name: "NGUYỄN THỊ BÍCH QUYÊN", class: "12A01", status: "present" },
-    { id: 762, name: "NGUYỄN THỊ MỸ TÂM", class: "12A01", status: "present" },
-    { id: 763, name: "CAO VĂN THI", class: "12A01", status: "present" },
-    { id: 764, name: "LÊ THỊ ÁNH THI", class: "12A01", status: "present" },
-    { id: 765, name: "HỒ THỦY TIÊN", class: "12A01", status: "present" },
-    { id: 766, name: "PHẠM VĂN TIÊN", class: "12A01", status: "present" },
-    { id: 767, name: "CAO NGUYỄN MINH TRÂM", class: "12A01", status: "present" },
-    { id: 768, name: "HỒ MINH TRÍ", class: "12A01", status: "present" },
-    { id: 769, name: "NGUYỄN MINH TRÍ", class: "12A01", status: "present" },
-    { id: 770, name: "NGUYỄN MINH TRỌNG", class: "12A01", status: "present" },
-    { id: 771, name: "NGUYỄN DŨNG TUẤN", class: "12A01", status: "present" },
-    { id: 772, name: "NGUYỄN THỊ TỐ UYÊN", class: "12A01", status: "present" },
-    { id: 773, name: "LÊ THẾ VUI", class: "12A01", status: "present" },
-    { id: 774, name: "NGUYỄN NGỌC THẢO VY", class: "12A01", status: "present" },
-    { id: 775, name: "LÊ THỊ BẢO YẾN", class: "12A01", status: "present" },
-    { id: 776, name: "VÕ THỊ VÂN ANH", class: "12A02", status: "present" },
-    { id: 777, name: "ĐỖ NGỌC BẢO", class: "12A02", status: "present" },
-    { id: 778, name: "LÊ THỊ NGỌC BÍCH", class: "12A02", status: "present" },
-    { id: 779, name: "LÊ THỊ BÌNH", class: "12A02", status: "present" },
-    { id: 780, name: "NGÔ TẤN DŨNG", class: "12A02", status: "present" },
-    { id: 781, name: "NGUYỄN THÀNH DUY", class: "12A02", status: "present" },
-    { id: 782, name: "NGUYỄN THỊ KIM HƯƠNG", class: "12A02", status: "present" },
-    { id: 783, name: "NGUYỄN HOÀNG GIA KHANG", class: "12A02", status: "present" },
-    { id: 784, name: "NGUYỄN THỊ HỒNG LIÊN", class: "12A02", status: "present" },
-    { id: 785, name: "PHẠM ĐỨC LỘC", class: "12A02", status: "present" },
-    { id: 786, name: "HOÀNG LÊ TRÚC MAI", class: "12A02", status: "present" },
-    { id: 787, name: "Lê Hoàng Minh", class: "12A02", status: "present" },
-    { id: 788, name: "LÝ PHỤNG NGHI", class: "12A02", status: "present" },
-    { id: 789, name: "PHAN THỊ NGỌC", class: "12A02", status: "present" },
-    { id: 790, name: "TRỊNH KHÁNH NGỌC", class: "12A02", status: "present" },
-    { id: 791, name: "TRẦN ĐÃI PHONG", class: "12A02", status: "present" },
-    { id: 792, name: "ĐẶNG THỊ KIM PHỤNG", class: "12A02", status: "present" },
-    { id: 793, name: "ĐÀO MẠNH QUÂN", class: "12A02", status: "present" },
-    { id: 794, name: "ĐẶNG THỊ THANH QUỲNH", class: "12A02", status: "present" },
-    { id: 795, name: "LƯU THỊ DIỄM THU", class: "12A02", status: "present" },
-    { id: 796, name: "LÒ THỊ KIM THƯƠNG", class: "12A02", status: "present" },
-    { id: 797, name: "CÀ THÁI THÙY TRANG", class: "12A02", status: "present" },
-    { id: 798, name: "LÊ THÚY UYÊN", class: "12A02", status: "present" },
-    { id: 799, name: "LÒ QUANG VINH", class: "12A02", status: "present" },
-    { id: 800, name: "NGUYỄN PHẠM THẢO VY", class: "12A02", status: "present" },
-    { id: 801, name: "NGUYỄN THỊ LAN ANH", class: "12A03", status: "present" },
-    { id: 802, name: "VŨ THỊ VÂN ANH", class: "12A03", status: "present" },
-    { id: 803, name: "NGUYỄN THẾ BẢO", class: "12A03", status: "present" },
-    { id: 804, name: "NGUYỄN VĂN GIA BẢO", class: "12A03", status: "present" },
-    { id: 805, name: "NGUYỄN CÔNG BÌNH", class: "12A03", status: "present" },
-    { id: 806, name: "HỒ THỊ MỸ CHÂU", class: "12A03", status: "present" },
-    { id: 807, name: "NGUYỄN NHƯ BẢO CHÂU", class: "12A03", status: "present" },
-    { id: 808, name: "NGUYỄN PHẠM NGỌC CƯỜNG", class: "12A03", status: "present" },
-    { id: 809, name: "NGUYỄN THỊ HỒNG DIỆP", class: "12A03", status: "present" },
-    { id: 810, name: "LÊ NGUYỄN HƯƠNG GIANG", class: "12A03", status: "present" },
-    { id: 811, name: "ĐOÀN THỊ HIẾU HẠNH", class: "12A03", status: "present" },
-    { id: 812, name: "LÒ NHẬT HOÀNG", class: "12A03", status: "present" },
-    { id: 813, name: "NGUYỄN THÁI HOÀNG", class: "12A03", status: "present" },
-    { id: 814, name: "NGUYỄN THÁI HUY", class: "12A03", status: "present" },
-    { id: 815, name: "LÊ THỊ THANH HUYỀN", class: "12A03", status: "present" },
-    { id: 816, name: "ĐINH NHẤT KHOA", class: "12A03", status: "present" },
-    { id: 817, name: "NGUYỄN PHƯƠNG HẠ LAN", class: "12A03", status: "present" },
-    { id: 818, name: "NGUYỄN THỊ LAN", class: "12A03", status: "present" },
-    { id: 819, name: "NGUYỄN BÍCH LY", class: "12A03", status: "present" },
-    { id: 820, name: "NGUYỄN THANH MINH", class: "12A03", status: "present" },
-    { id: 821, name: "TRIỆU YẾN NHI", class: "12A03", status: "present" },
-    { id: 822, name: "NGUYỄN NGỌC ÁNH NHƯ", class: "12A03", status: "present" },
-    { id: 823, name: "LƯU THỊ KIỀU OANH", class: "12A03", status: "present" },
-    { id: 824, name: "PHẠM ANH PHONG", class: "12A03", status: "present" },
-    { id: 825, name: "NGUYỄN HOÀNG NGUYÊN PHÚC", class: "12A03", status: "present" },
-    { id: 826, name: "NGUYỄN THẾ ANH QUANG", class: "12A03", status: "present" },
-    { id: 827, name: "PHẠM NGUYÊN QUANG", class: "12A03", status: "present" },
-    { id: 828, name: "BẠCH LONG QUÂN", class: "12A03", status: "present" },
-    { id: 829, name: "LÊ PHÚC TÀI", class: "12A03", status: "present" },
-    { id: 830, name: "LÊ ĐỨC TÂM THANH", class: "12A03", status: "present" },
-    { id: 831, name: "LƯƠNG THỊ THANH THẢO", class: "12A03", status: "present" },
-    { id: 832, name: "Hà Minh Thiện", class: "12A03", status: "present" },
-    { id: 833, name: "CAO HUỲNH MINH THƯ", class: "12A03", status: "present" },
-    { id: 834, name: "ĐỖ HUYỀN THƯ", class: "12A03", status: "present" },
-    { id: 835, name: "MAI ANH THƯ", class: "12A03", status: "present" },
-    { id: 836, name: "TRẦN NGUYỄN MINH THƯ", class: "12A03", status: "present" },
-    { id: 837, name: "ĐOÀN THỊ HOÀI THƯƠNG", class: "12A03", status: "present" },
-    { id: 838, name: "HUỲNH THỊ THÙY TRANG", class: "12A03", status: "present" },
-    { id: 839, name: "NGUYỄN THỊ THANH TRÚC", class: "12A03", status: "present" },
-    { id: 840, name: "ĐOÀN QUANG TUẤN", class: "12A03", status: "present" },
-    { id: 841, name: "ĐẶNG NHẬT THẢO VÂN", class: "12A03", status: "present" },
-    { id: 842, name: "HÀ KIM DU", class: "12A04", status: "present" },
-    { id: 843, name: "NGUYỄN TRUNG DŨNG", class: "12A04", status: "present" },
-    { id: 844, name: "H' DUYÊN H'ĐƠK THẨM", class: "12A04", status: "present" },
-    { id: 845, name: "HỒ TRỊNH TRƯỜNG GIANG", class: "12A04", status: "present" },
-    { id: 846, name: "HỒ BÙI NGỌC HÀ", class: "12A04", status: "present" },
-    { id: 847, name: "NGUYỄN HUY HÀ", class: "12A04", status: "present" },
-    { id: 848, name: "Trịnh Nguyễn Thiên Hương", class: "12A04", status: "present" },
-    { id: 849, name: "HUỲNH BÁ HỮU", class: "12A04", status: "present" },
-    { id: 850, name: "PHẠM VĂN KHÔI", class: "12A04", status: "present" },
-    { id: 851, name: "ĐINH ĐẠI LONG", class: "12A04", status: "present" },
-    { id: 852, name: "LÊ XUÂN MẠNH", class: "12A04", status: "present" },
-    { id: 853, name: "NGUYỄN LÊ THẢO MY", class: "12A04", status: "present" },
-    { id: 854, name: "HOÀNG NGỌC", class: "12A04", status: "present" },
-    { id: 855, name: "LÊ NGUYỄN HOÀNG NGUYÊN", class: "12A04", status: "present" },
-    { id: 856, name: "THÙNG THỊ THẢO NGUYÊN", class: "12A04", status: "present" },
-    { id: 857, name: "TRẦN HOÀNG NHÂN", class: "12A04", status: "present" },
-    { id: 858, name: "TRẦN QUANG NHẬT", class: "12A04", status: "present" },
-    { id: 859, name: "ĐÀO THỊ QUỲNH NHƯ", class: "12A04", status: "present" },
-    { id: 860, name: "NGUYỄN THỊ KIỀU OANH", class: "12A04", status: "present" },
-    { id: 861, name: "NGUYỄN MINH PHƯỚC", class: "12A04", status: "present" },
-    { id: 862, name: "LÊ ĐỨC ANH QUÂN", class: "12A04", status: "present" },
-    { id: 863, name: "NGUYỄN THỊ THANH QUYÊN", class: "12A04", status: "present" },
-    { id: 864, name: "ĐOÀN LÊ NHƯ QUỲNH", class: "12A04", status: "present" },
-    { id: 865, name: "NGUYỄN CHÍ TÂM", class: "12A04", status: "present" },
-    { id: 866, name: "TRỊNH LÊ THANH THÁI", class: "12A04", status: "present" },
-    { id: 867, name: "TRƯƠNG TRƯỜNG THÀNH", class: "12A04", status: "present" },
-    { id: 868, name: "NGUYỄN MẬU THIÊN", class: "12A04", status: "present" },
-    { id: 869, name: "NGUYỄN SỸ THUẬN", class: "12A04", status: "present" },
-    { id: 870, name: "NGUYỄN VIỆT TIẾN", class: "12A04", status: "present" },
-    { id: 871, name: "NGUYỄN KIỀU GIA TÍN", class: "12A04", status: "present" },
-    { id: 872, name: "LÊ THÀNH TRUNG", class: "12A04", status: "present" },
-    { id: 873, name: "TRẦN TRỌNG TRUNG", class: "12A04", status: "present" },
-    { id: 874, name: "HÀ CẨM TÚ", class: "12A04", status: "present" },
-    { id: 875, name: "LƯU HÀ AN", class: "12A05", status: "present" },
-    { id: 876, name: "NGUYỄN VĂN AN", class: "12A05", status: "present" },
-    { id: 877, name: "VÕ THỊ DIỄM", class: "12A05", status: "present" },
-    { id: 878, name: "TRẦN ĐỨC DUY", class: "12A05", status: "present" },
-    { id: 879, name: "Y DUYẾT HĐƠK", class: "12A05", status: "present" },
-    { id: 880, name: "BÙI ĐỨC TUẤN ĐẠT", class: "12A05", status: "present" },
-    { id: 881, name: "H ĐÊ BÔRA KTŬL", class: "12A05", status: "present" },
-    { id: 882, name: "H ĐIÊU BYĂ", class: "12A05", status: "present" },
-    { id: 883, name: "HOÀNG PHÁT HẢO", class: "12A05", status: "present" },
-    { id: 884, name: "NGUYỄN BẢO HÂN", class: "12A05", status: "present" },
-    { id: 885, name: "TRẦN VÕ KHÁNH HÂN", class: "12A05", status: "present" },
-    { id: 886, name: "ĐỖ THỊ MINH HẬU", class: "12A05", status: "present" },
-    { id: 887, name: "ĐẶNG MINH HIẾU", class: "12A05", status: "present" },
-    { id: 888, name: "TRỊNH THỊ HOÀI", class: "12A05", status: "present" },
-    { id: 889, name: "NGUYỄN THỊ KIM HUỆ", class: "12A05", status: "present" },
-    { id: 890, name: "TRỊNH THỊ THANH HUYỀN", class: "12A05", status: "present" },
-    { id: 891, name: "H LỄ - HĐƠK", class: "12A05", status: "present" },
-    { id: 892, name: "HOÀNG THỊ THU LINH", class: "12A05", status: "present" },
-    { id: 893, name: "PHẠM HOÀNG LINH", class: "12A05", status: "present" },
-    { id: 894, name: "NGUYỄN MẠNH TIẾN LONG", class: "12A05", status: "present" },
-    { id: 895, name: "H LUIM KBUÔR", class: "12A05", status: "present" },
-    { id: 896, name: "HOÀNG NHẬT LƯƠNG", class: "12A05", status: "present" },
-    { id: 897, name: "NGUYỄN THỊ NGỌC MAI", class: "12A05", status: "present" },
-    { id: 898, name: "BÙI ANH QUÂN", class: "12A05", status: "present" },
-    { id: 899, name: "ĐỖ VĂN TÀI", class: "12A05", status: "present" },
-    { id: 900, name: "H THÂM KTUL", class: "12A05", status: "present" },
-    { id: 901, name: "HOÀNG MINH NHẬT THU", class: "12A05", status: "present" },
-    { id: 902, name: "NGUYỄN ĐAN THÙY", class: "12A05", status: "present" },
-    { id: 903, name: "ĐẶNG THỊ THANH THỦY", class: "12A05", status: "present" },
-    { id: 904, name: "NGUYỄN QUỐC TIẾN", class: "12A05", status: "present" },
-    { id: 905, name: "NGUYỄN SONG TOÀN", class: "12A05", status: "present" },
-    { id: 906, name: "Y TRA BYĂ", class: "12A05", status: "present" },
-    { id: 907, name: "NGUYỄN THỊ TRANG", class: "12A05", status: "present" },
-    { id: 908, name: "NGUYỄN THỊ HOÀI TRÂM", class: "12A05", status: "present" },
-    { id: 909, name: "NGUYỄN HOÀNG CÁT VŨ", class: "12A05", status: "present" },
-    { id: 910, name: "TRẦN TRÍ VỸ", class: "12A05", status: "present" },
-    { id: 911, name: "BÙI THỊ KIM YẾN", class: "12A05", status: "present" },
-    { id: 912, name: "HOÀNG TRINH TUYẾT CHI", class: "12A06", status: "present" },
-    { id: 913, name: "TRẦN HOÀNG ĐẠI", class: "12A06", status: "present" },
-    { id: 914, name: "NGUYỄN THỊ NGỌC HÀ", class: "12A06", status: "present" },
-    { id: 915, name: "HOÀNG MẠNH HÂN", class: "12A06", status: "present" },
-    { id: 916, name: "MAI THỊ HUỆ", class: "12A06", status: "present" },
-    { id: 917, name: "NGUYỄN BÁ HUY", class: "12A06", status: "present" },
-    { id: 918, name: "Y JIMI BKRÔNG", class: "12A06", status: "present" },
-    { id: 919, name: "Y KHIÊT BKRÔNG", class: "12A06", status: "present" },
-    { id: 920, name: "LÊ VIẾT ĐĂNG KHOA", class: "12A06", status: "present" },
-    { id: 921, name: "ĐINH DIỆU HÀ LINH", class: "12A06", status: "present" },
-    { id: 922, name: "NGUYỄN THỊ THANH LỘC", class: "12A06", status: "present" },
-    { id: 923, name: "ĐỖ NGỌC TRÀ MY", class: "12A06", status: "present" },
-    { id: 924, name: "PHẠM HUYỀN GIÁNG MY", class: "12A06", status: "present" },
-    { id: 925, name: "HUỲNH NGỌC THẢO NGÂN", class: "12A06", status: "present" },
-    { id: 926, name: "THÁI PHƯƠNG NGHI", class: "12A06", status: "present" },
-    { id: 927, name: "BÙI TRỌNG NGHĨA", class: "12A06", status: "present" },
-    { id: 928, name: "NGUYỄN HẢI ĐÌNH NGUYÊN", class: "12A06", status: "present" },
-    { id: 929, name: "NGUYỄN KHÁNH NHÂN", class: "12A06", status: "present" },
-    { id: 930, name: "NGUYỄN NGÔ NGỌC QUANG", class: "12A06", status: "present" },
-    { id: 931, name: "H QUÊN ÊYA", class: "12A06", status: "present" },
-    { id: 932, name: "NGUYỄN - PHẠM - VƯƠNG - QUỐC", class: "12A06", status: "present" },
-    { id: 933, name: "NGUYỄN DANH QUYẾT", class: "12A06", status: "present" },
-    { id: 934, name: "VÕ THỊ THẢO QUỲNH", class: "12A06", status: "present" },
-    { id: 935, name: "ĐỖ MY SA", class: "12A06", status: "present" },
-    { id: 936, name: "ĐẬU QUỲNH THƯ", class: "12A06", status: "present" },
-    { id: 937, name: "NGUYỄN HOÀI THƯƠNG", class: "12A06", status: "present" },
-    { id: 938, name: "ĐỖ THỊ THỦY TIÊN", class: "12A06", status: "present" },
-    { id: 939, name: "HỒ THỊ MỸ TRANG", class: "12A06", status: "present" },
-    { id: 940, name: "DƯƠNG THỊ HẠ VI", class: "12A06", status: "present" },
-    { id: 941, name: "NGUYỄN LÊ THẢO VY", class: "12A06", status: "present" },
-    { id: 942, name: "NGUYỄN THỊ AN BYĂ", class: "12A07", status: "present" },
-    { id: 943, name: "NGUYỄN THỊ CẨM ANH", class: "12A07", status: "present" },
-    { id: 944, name: "NGUYỄN THỊ THANH CHÚC", class: "12A07", status: "present" },
-    { id: 945, name: "NGUYỄN LỢI DANH", class: "12A07", status: "present" },
-    { id: 946, name: "VÕ TRẦN NGHI DUNG", class: "12A07", status: "present" },
-    { id: 947, name: "ĐINH TIẾN DŨNG", class: "12A07", status: "present" },
-    { id: 948, name: "PHẠM ĐẠI DƯƠNG", class: "12A07", status: "present" },
-    { id: 949, name: "LỤC THỊ THU HẰNG", class: "12A07", status: "present" },
-    { id: 950, name: "LÒ THỊ THU HÒA", class: "12A07", status: "present" },
-    { id: 951, name: "LÊ VIỆT HOÀNG", class: "12A07", status: "present" },
-    { id: 952, name: "NGUYỄN DANH HOÀNG", class: "12A07", status: "present" },
-    { id: 953, name: "NGUYỄN LÂM HÙNG", class: "12A07", status: "present" },
-    { id: 954, name: "LÊ ĐỨC HƯNG", class: "12A07", status: "present" },
-    { id: 955, name: "H' JER NIÊ", class: "12A07", status: "present" },
-    { id: 956, name: "ĐINH QUỐC KHÁNH", class: "12A07", status: "present" },
-    { id: 957, name: "NGUYỄN HOÀNG LÂN", class: "12A07", status: "present" },
-    { id: 958, name: "Y LEM ÊBAN", class: "12A07", status: "present" },
-    { id: 959, name: "MAI THỊ HÀ LINH", class: "12A07", status: "present" },
-    { id: 960, name: "NGUYỄN THỊ PHƯƠNG LINH", class: "12A07", status: "present" },
-    { id: 961, name: "TRẦN HOÀI LINH", class: "12A07", status: "present" },
-    { id: 962, name: "TRẦN THỊ MỸ LINH", class: "12A07", status: "present" },
-    { id: 963, name: "TRẦN BẢO LONG", class: "12A07", status: "present" },
-    { id: 964, name: "TRƯƠNG NGUYỄN THIÊN LONG", class: "12A07", status: "present" },
-    { id: 965, name: "H MÍA ÊBAN", class: "12A07", status: "present" },
-    { id: 966, name: "H' MY BUÔN YĂ", class: "12A07", status: "present" },
-    { id: 967, name: "DƯƠNG KHẮC NAM", class: "12A07", status: "present" },
-    { id: 968, name: "PHẠM PHƯƠNG NGÂN", class: "12A07", status: "present" },
-    { id: 969, name: "H' NGIN - BYĂ", class: "12A07", status: "present" },
-    { id: 970, name: "VÕ HỒNG NGỌC", class: "12A07", status: "present" },
-    { id: 971, name: "VÕ HOÀI NI", class: "12A07", status: "present" },
-    { id: 972, name: "H NIM BYĂ", class: "12A07", status: "present" },
-    { id: 973, name: "ĐẬU HÙNG PHÁT", class: "12A07", status: "present" },
-    { id: 974, name: "HOÀNG MINH PHỤNG", class: "12A07", status: "present" },
-    { id: 975, name: "NGUYỄN TRÍ TÀI", class: "12A07", status: "present" },
-    { id: 976, name: "Lù Thị Bích Thảo", class: "12A07", status: "present" },
-    { id: 977, name: "NGUYỄN VĂN THIỆN", class: "12A07", status: "present" },
-    { id: 978, name: "ĐOÀN NGỌC THỌ", class: "12A07", status: "present" },
-    { id: 979, name: "HỒ THỊ ĐOAN TRANG", class: "12A07", status: "present" },
-    { id: 980, name: "PHẠM KHÁNH TRIỀU", class: "12A07", status: "present" },
-    { id: 981, name: "NGUYỄN THIÊN TRƯỜNG", class: "12A07", status: "present" },
-    { id: 982, name: "TRỊNH QUANG VIỆT", class: "12A07", status: "present" },
-    { id: 983, name: "NGUYỄN PHAN HIỀN ANH", class: "12A08", status: "present" },
-    { id: 984, name: "PHẠM HỒ QUỲNH ANH", class: "12A08", status: "present" },
-    { id: 985, name: "LƯƠNG THỊ NGỌC ÁNH", class: "12A08", status: "present" },
-    { id: 986, name: "LÊ THỊ BẢO CHÂU", class: "12A08", status: "present" },
-    { id: 987, name: "NGUYỄN NGỌC MAI CHI", class: "12A08", status: "present" },
-    { id: 988, name: "THÙNG THỊ LINH CHI", class: "12A08", status: "present" },
-    { id: 989, name: "H CHINA KBUÔR", class: "12A08", status: "present" },
-    { id: 990, name: "CÀ NHẬT DUY", class: "12A08", status: "present" },
-    { id: 991, name: "H' ĐALY - ÊYA", class: "12A08", status: "present" },
-    { id: 992, name: "Y - ĐAN - KTUL", class: "12A08", status: "present" },
-    { id: 993, name: "LÊ HẢI ĐĂNG", class: "12A08", status: "present" },
-    { id: 994, name: "VÕ HUY HOÀNG", class: "12A08", status: "present" },
-    { id: 995, name: "TRƯƠNG THỊ THU HUYỀN", class: "12A08", status: "present" },
-    { id: 996, name: "ME THÁI KHANG", class: "12A08", status: "present" },
-    { id: 997, name: "ĐOÀN TRUNG KIÊN", class: "12A08", status: "present" },
-    { id: 998, name: "HUỲNH BẢO LÂM", class: "12A08", status: "present" },
-    { id: 999, name: "NGUYỄN LƯƠNG BẢO LUÂN", class: "12A08", status: "present" },
-    { id: 1000, name: "NGÔ VŨ ANH MINH", class: "12A08", status: "present" },
-    { id: 1001, name: "NGUYỄN THỊ KIM NGA", class: "12A08", status: "present" },
-    { id: 1002, name: "PHAN NGUYỄN THẢO NGUYÊN", class: "12A08", status: "present" },
-    { id: 1003, name: "NGUYỄN QUỲNH NHƯ", class: "12A08", status: "present" },
-    { id: 1004, name: "H' PHA LIN BYĂ", class: "12A08", status: "present" },
-    { id: 1005, name: "BÙI HUỲNH THANH PHONG", class: "12A08", status: "present" },
-    { id: 1006, name: "Y THANG KTUL", class: "12A08", status: "present" },
-    { id: 1007, name: "ĐINH THỊ THU THẢO", class: "12A08", status: "present" },
-    { id: 1008, name: "NGUYỄN THỊ PHƯƠNG THẢO", class: "12A08", status: "present" },
-    { id: 1009, name: "HUỲNH THƠ", class: "12A08", status: "present" },
-    { id: 1010, name: "TỐNG THỊ HÀ TIÊN", class: "12A08", status: "present" },
-    { id: 1011, name: "Y TIP - HĐƠK", class: "12A08", status: "present" },
-    { id: 1012, name: "DƯƠNG HUY TOÀN", class: "12A08", status: "present" },
-    { id: 1013, name: "VŨ THỊ THU TRANG", class: "12A08", status: "present" },
-    { id: 1014, name: "ĐỒNG THỊ MỸ TRÂM", class: "12A08", status: "present" },
-    { id: 1015, name: "HUỲNH TẤN TRÍ", class: "12A08", status: "present" },
-    { id: 1016, name: "TRẦN TRỊNH MINH TUẤN", class: "12A08", status: "present" },
-    { id: 1017, name: "HOÀNG THỊ BẢO VÂN", class: "12A08", status: "present" },
-    { id: 1018, name: "LÊ KIM VŨ", class: "12A08", status: "present" },
-    { id: 1019, name: "VÕ THỊ NGỌC XUÂN", class: "12A08", status: "present" },
-    { id: 1020, name: "H' YƯƠC BYĂ", class: "12A08", status: "present" },
-    { id: 1021, name: "Phan Thị Ngọc Ánh", class: "12A09", status: "present" },
-    { id: 1022, name: "NGUYỄN THỊ HOÀI ÂN", class: "12A09", status: "present" },
-    { id: 1023, name: "PHẠM ĐÌNH BẢO", class: "12A09", status: "present" },
-    { id: 1024, name: "PHAN THỊ QUỲNH CHI", class: "12A09", status: "present" },
-    { id: 1025, name: "Y DLU - ADRƠNG", class: "12A09", status: "present" },
-    { id: 1026, name: "LÒ THỊ KIM ĐIỆP", class: "12A09", status: "present" },
-    { id: 1027, name: "LƯƠNG QUANG HOÀNG ĐIỆP", class: "12A09", status: "present" },
-    { id: 1028, name: "NGUYỄN MỸ HẢO", class: "12A09", status: "present" },
-    { id: 1029, name: "NGUYỄN BẢO HUY", class: "12A09", status: "present" },
-    { id: 1030, name: "LƯU ĐẶNG MAI HƯƠNG", class: "12A09", status: "present" },
-    { id: 1031, name: "PHẠM HỒ AN KHANG", class: "12A09", status: "present" },
-    { id: 1032, name: "TRẦN THIỆN KHIÊM", class: "12A09", status: "present" },
-    { id: 1033, name: "NGUYỄN ĐÌNH ANH KHOA", class: "12A09", status: "present" },
-    { id: 1034, name: "HỒ THỊ MỸ KIỀU", class: "12A09", status: "present" },
-    { id: 1035, name: "H LAN NA - HĐƠK", class: "12A09", status: "present" },
-    { id: 1036, name: "NGÔ BẢO LONG", class: "12A09", status: "present" },
-    { id: 1037, name: "LÊ THÀNH LUÂN", class: "12A09", status: "present" },
-    { id: 1038, name: "NGUYỄN THẢO LY", class: "12A09", status: "present" },
-    { id: 1039, name: "NGUYỄN THỊ THẢO LY", class: "12A09", status: "present" },
-    { id: 1040, name: "TRẦN THỊ KHÁNH LY", class: "12A09", status: "present" },
-    { id: 1041, name: "H NA RI H'ĐƠK", class: "12A09", status: "present" },
-    { id: 1042, name: "QUẢN THỊ THÙY NGÂN", class: "12A09", status: "present" },
-    { id: 1043, name: "TRẦN TRUNG NGUYÊN", class: "12A09", status: "present" },
-    { id: 1044, name: "PHẠM THỊ YẾN NHI", class: "12A09", status: "present" },
-    { id: 1045, name: "NGUYỄN NGỌC QUỲNH NHƯ", class: "12A09", status: "present" },
-    { id: 1046, name: "NGUYỄN ĐĂNG QUANG", class: "12A09", status: "present" },
-    { id: 1047, name: "VÕ ANH QUỐC", class: "12A09", status: "present" },
-    { id: 1048, name: "NGUYỄN XUÂN SƠN", class: "12A09", status: "present" },
-    { id: 1049, name: "NGUYỄN ĐĂNG HOÀNG THIỆN", class: "12A09", status: "present" },
-    { id: 1050, name: "LÊ THỊ THANH THÙY", class: "12A09", status: "present" },
-    { id: 1051, name: "NGÔ NGUYỄN MINH THƯ", class: "12A09", status: "present" },
-    { id: 1052, name: "H TRA ÊBAN", class: "12A09", status: "present" },
-    { id: 1053, name: "H TRÀ MI BYĂ", class: "12A09", status: "present" },
-    { id: 1054, name: "NGUYỄN BẢO TRÂM", class: "12A09", status: "present" },
-    { id: 1055, name: "MAI THỊ ÁNH TUYẾT", class: "12A09", status: "present" },
-    { id: 1056, name: "CAO NHÃ VY", class: "12A09", status: "present" },
-    { id: 1057, name: "H WĔ ÊBAN", class: "12A09", status: "present" },
-    { id: 1058, name: "Y - YAKƠ NIÊ", class: "12A09", status: "present" }
-        ];
 
-        // 3. LOGIC XỬ LÝ
-        let globalStudents = []; 
-        let isAdmin = false;
-        const SYSTEM_PASSWORD = "123";
+        // 2. BIEN TRANG THAI
+        let students = [];
+        let accounts = {};
+        let role = "guest"; 
+        let myClass = "";
+        let impType = ""; // 'hs' hoac 'acc'
 
-        // --- HÀM HỖ TRỢ XỬ LÝ TIẾNG VIỆT & TÌM KIẾM ---
-        function removeVietnameseTones(str) {
-            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
-            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
-            str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
-            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
-            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
-            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
-            str = str.replace(/đ/g,"d");
-            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
-            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
-            str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
-            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
-            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
-            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
-            str = str.replace(/Đ/g, "D");
-            return str.toLowerCase(); // Trả về chữ thường không dấu
-        }
-
-        function getInitials(name) {
-            // Lấy chữ cái đầu của mỗi từ (Ví dụ: Nguyễn Văn An -> nva)
-            return removeVietnameseTones(name).split(' ').map(word => word.charAt(0)).join('');
-        }
-
-        // Lắng nghe dữ liệu
-        const starCountRef = ref(db, 'students');
-        onValue(starCountRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                globalStudents = Object.values(data); 
-                renderTable();
-                initFilter();
-                document.getElementById('btnUploadData').style.display = 'none';
-            } else {
-                globalStudents = [];
-                document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color: red;">Chưa có dữ liệu.</td></tr>';
-                document.getElementById('statTotal').textContent = "0";
-                if(isAdmin) document.getElementById('btnUploadData').style.display = 'inline-block';
-            }
+        // 3. LAY DU LIEU TU SERVER
+        onValue(ref(db, 'students'), (snap) => {
+            students = snap.val() ? Object.values(snap.val()) : [];
+            updateFilterClass();
+            renderTable();
         });
 
-        window.toggleStatus = function(id) {
-            const student = globalStudents.find(s => s.id === id);
-            if (student) {
-                const newStatus = (student.status === 'present') ? 'absent' : 'present';
-                const now = new Date();
-                const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`;
-                update(ref(db, 'students/' + id), { status: newStatus, lastUpdated: timeStr });
-            }
-        };
+        onValue(ref(db, 'accounts'), (snap) => {
+            accounts = snap.val() || {};
+        });
 
-        window.uploadInitialData = function() {
-            if(confirm("Bạn muốn nạp danh sách học sinh?")) {
-                const updates = {};
-                initialStudentsData.forEach(s => { updates['students/' + s.id] = s; });
-                update(ref(db), updates).then(() => alert("Thành công!"));
-            }
-        }
+        // 4. XU LY DANG NHAP
+        document.getElementById('btnAdmin').addEventListener('click', () => {
+            if (role === "guest") {
+                const pass = prompt("Nhap mat khau quan ly:");
+                if (!pass) return;
 
-        function renderTable() {
-            const tbody = document.getElementById("tableBody");
-            const fClass = document.getElementById("filterClass").value;
-            const fStatus = document.getElementById("filterStatus").value;
-            // Lấy từ khóa tìm kiếm, xóa dấu, chuyển về chữ thường
-            const fSearch = removeVietnameseTones(document.getElementById("searchInput").value.trim());
-
-            tbody.innerHTML = "";
-            let statTotal = 0, statPresent = 0, statAbsent = 0;
-            let displayCount = 0;
-
-            const sortedStudents = [...globalStudents].sort((a, b) => a.class.localeCompare(b.class));
-
-            sortedStudents.forEach((s) => {
-                // 1. Lọc Lớp
-                let isClassMatch = (fClass === 'all' || s.class === fClass);
-                
-                // 2. Lọc Trạng thái
-                let isStatusMatch = (fStatus === 'all' || s.status === fStatus);
-
-                // 3. Lọc Thông minh (Tên)
-                let isSearchMatch = true;
-                if (fSearch !== "") {
-                    const nameNoTone = removeVietnameseTones(s.name); // Tên không dấu
-                    const initials = getInitials(s.name); // Chữ cái đầu (nva)
-                    
-                    // Kiểm tra: Tên chứa từ khóa HOẶC Chữ cái đầu chứa từ khóa
-                    if (!nameNoTone.includes(fSearch) && !initials.includes(fSearch)) {
-                        isSearchMatch = false;
+                let found = false;
+                if (pass === "123") { role = "admin"; found = true; } 
+                else {
+                    for (let k in accounts) {
+                        if (accounts[k].password === pass) {
+                            role = accounts[k].role;
+                            myClass = accounts[k].targetClass || "";
+                            found = true; break;
+                        }
                     }
                 }
 
-                // Nếu thỏa mãn tất cả điều kiện
-                if (isClassMatch && isStatusMatch && isSearchMatch) {
-                    statTotal++;
-                    s.status === 'present' ? statPresent++ : statAbsent++;
-                    displayCount++;
+                if (found) {
+                    alert("Dang nhap thanh cong!");
+                    setUIMode(true);
+                } else alert("Sai mat khau!");
+            } else {
+                if (confirm("Dang xuat?")) location.reload();
+            }
+        });
 
-                    const badge = s.status === 'present' 
-                        ? `<span class="badge bg-present">CÓ MẶT</span>` 
-                        : `<span class="badge bg-absent">VẮNG</span>`;
-                    
-                    const actionBtn = `<button class="btn-toggle" onclick="toggleStatus(${s.id})">Đổi</button>`;
-                    const lastUpd = s.lastUpdated ? s.lastUpdated : '-';
+        function setUIMode(isAdmin) {
+            document.getElementById('btnAdmin').innerHTML = role.toUpperCase() + (myClass ? " " + myClass : "");
+            document.getElementById('btnAdmin').classList.add('active-admin');
+            document.getElementById('colAction').classList.remove('hidden');
+            if (role === "admin") document.getElementById('adminTools').style.display = "flex";
+            renderTable();
+        }
 
-                    const tr = document.createElement("tr");
+        // 5. XU LY EXCEL
+        const fileInp = document.getElementById('fileInput');
+        document.getElementById('btnImpHS').addEventListener('click', () => { impType = "hs"; fileInp.click(); });
+        document.getElementById('btnImpAcc').addEventListener('click', () => { impType = "acc"; fileInp.click(); });
+
+        fileInp.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const data = new Uint8Array(ev.target.result);
+                const wb = XLSX.read(data, { type: 'array' });
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                
+                const updates = {};
+                if (impType === "hs") {
+                    json.forEach((r, i) => {
+                        const id = r.STT || (i + 1);
+                        updates['students/' + id] = { id: id, name: r.Ho_Ten, class: String(r.Lop), status: r.Trang_Thai || "present" };
+                    });
+                } else {
+                    json.forEach((r, i) => {
+                        updates['accounts/acc' + i] = { displayName: r.Ten, password: String(r.Pass), role: r.Quyen, targetClass: String(r.Lop_Target || "") };
+                    });
+                }
+                update(ref(db), updates).then(() => { alert("Nhap du lieu thanh cong!"); fileInp.value = ""; });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('btnTemplate').addEventListener('click', () => {
+            const wb = XLSX.utils.book_new();
+            const ws1 = XLSX.utils.json_to_sheet([{ STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A1", Trang_Thai: "present" }]);
+            XLSX.utils.book_append_sheet(wb, ws1, "HocSinh");
+            const ws2 = XLSX.utils.json_to_sheet([{ Ten: "GVCN 10A1", Pass: "lop10a1", Quyen: "class_manager", Lop_Target: "10A1" }, { Ten: "Truc Cong", Pass: "cong2026", Quyen: "gate", Lop_Target: "" }]);
+            XLSX.utils.book_append_sheet(wb, ws2, "TaiKhoan");
+            XLSX.writeFile(wb, "Mau_Hoi_Trai_2026.xlsx");
+        });
+
+        // 6. HIEN THI BANG
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const fClass = document.getElementById('filterClass').value;
+            
+            tbody.innerHTML = "";
+            let sTotal = 0, sPre = 0, sAbs = 0;
+
+            students.sort((a,b) => a.class.localeCompare(b.class)).forEach((s, idx) => {
+                const matchClass = (fClass === "all" || s.class === fClass);
+                const matchSearch = s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search);
+
+                if (matchClass && matchSearch) {
+                    sTotal++;
+                    s.status === "present" ? sPre++ : sAbs++;
+
+                    const canEdit = (role === "admin" || role === "gate" || (role === "class_manager" && myClass === s.class));
+                    const btn = canEdit ? `<button onclick="window.doiTrangThai(${s.id}, '${s.status}')" style="cursor:pointer">Doi</button>` : "-";
+
+                    const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${displayCount}</td>
-                        <td><strong>${s.class}</strong></td>
+                        <td>${idx + 1}</td>
+                        <td><b>${s.class}</b></td>
                         <td>${s.name}</td>
-                        <td>${badge}</td>
-                        <td class="timestamp-cell">${lastUpd}</td>
-                        ${isAdmin ? `<td>${actionBtn}</td>` : `<td class="hidden"></td>`}
+                        <td><span class="badge ${s.status === 'present' ? 'bg-present' : 'bg-absent'}">${s.status.toUpperCase()}</span></td>
+                        <td style="font-size:0.8rem; color:gray">${s.lastUpdate || '-'}</td>
+                        <td class="${role === 'guest' ? 'hidden' : ''}">${btn}</td>
                     `;
                     tbody.appendChild(tr);
                 }
             });
 
-            document.getElementById("statTotal").textContent = statTotal;
-            document.getElementById("statPresent").textContent = statPresent;
-            document.getElementById("statAbsent").textContent = statAbsent;
+            document.getElementById('statTotal').innerText = sTotal;
+            document.getElementById('statPresent').innerText = sPre;
+            document.getElementById('statAbsent').innerText = sAbs;
         }
 
-        function initFilter() {
-            const select = document.getElementById("filterClass");
-            const uniqueClasses = [...new Set(globalStudents.map(s => s.class))].sort();
-            if (select.options.length <= 1 && uniqueClasses.length > 0) {
-                 select.innerHTML = '<option value="all">-- Tất cả các lớp --</option>';
-                 uniqueClasses.forEach(c => {
-                    const opt = document.createElement("option"); opt.value = c; opt.textContent = c;
+        window.doiTrangThai = (id, current) => {
+            const newSt = current === "present" ? "absent" : "present";
+            const now = new Date();
+            const time = `${now.getHours()}:${now.getMinutes()} - ${now.getDate()}/${now.getMonth()+1}`;
+            update(ref(db, 'students/' + id), { status: newSt, lastUpdate: time });
+        };
+
+        function updateFilterClass() {
+            const select = document.getElementById('filterClass');
+            const classes = [...new Set(students.map(s => s.class))].sort();
+            if (select.options.length <= 1) {
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.innerText = c;
                     select.appendChild(opt);
                 });
             }
         }
 
-        // --- EVENTS ---
-        document.getElementById('searchInput').addEventListener('input', renderTable); // Tìm kiếm ngay khi gõ
+        // Su kien loc
+        document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterClass').addEventListener('change', renderTable);
-        document.getElementById('filterStatus').addEventListener('change', renderTable);
-        document.getElementById('btnUploadData').addEventListener('click', window.uploadInitialData);
-        
-        document.getElementById('btnGuest').addEventListener('click', () => { isAdmin = false; updateUIMode(); });
-        document.getElementById('btnAdmin').addEventListener('click', () => {
-            if (!isAdmin) {
-                const pass = prompt("🔑 Nhập mật khẩu quản trị:");
-                if (pass === SYSTEM_PASSWORD) { isAdmin = true; updateUIMode(); } 
-                else if (pass !== null) alert("❌ Sai mật khẩu!");
-            }
-        });
 
-        function updateUIMode() {
-            const btnGuest = document.getElementById("btnGuest");
-            const btnAdmin = document.getElementById("btnAdmin");
-            const colAction = document.getElementById("colAction");
-            const btnUpload = document.getElementById("btnUploadData");
+        // Dong ho
+        setInterval(() => {
+            const n = new Date();
+            document.getElementById('liveTime').innerText = n.toLocaleTimeString('vi-VN');
+            document.getElementById('liveDate').innerText = n.toLocaleDateString('vi-VN', {weekday:'long', day:'numeric', month:'long'});
+        }, 1000);
 
-            if(isAdmin) {
-                btnGuest.classList.remove("active-guest");
-                btnAdmin.classList.add("active-admin");
-                colAction.classList.remove("hidden");
-                if(globalStudents.length === 0) btnUpload.style.display = 'inline-block';
-            } else {
-                btnGuest.classList.add("active-guest");
-                btnAdmin.classList.remove("active-admin");
-                colAction.classList.add("hidden");
-                btnUpload.style.display = 'none';
-            }
-            renderTable();
-        }
-
-        document.getElementById('btnExport').addEventListener('click', () => {
-            const now = new Date();
-            const timeStr = now.toLocaleString('vi-VN');
-            const fClass = document.getElementById("filterClass").value;
-            const fStatus = document.getElementById("filterStatus").value;
-            const fSearch = removeVietnameseTones(document.getElementById("searchInput").value.trim());
-            
-            let html = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-                <head><meta charset="UTF-8"></head>
-                <body>
-                    <h2 style="text-align:center">TRƯỜNG THPT SỐ 1 TRẦN PHÚ - HỘI TRẠI XUÂN 2026</h2>
-                    <p style="text-align:center"><i>Thời gian xuất: ${timeStr}</i></p>
-                    <table border="1" style="border-collapse: collapse; width: 100%;">
-                        <thead>
-                            <tr style="background-color: #d32f2f; color: white;">
-                                <th>STT</th><th>Lớp</th><th>Họ và Tên</th><th>Trạng Thái</th><th>Cập nhật cuối</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            let count = 0;
-            const sortedStudents = [...globalStudents].sort((a, b) => a.class.localeCompare(b.class));
-            sortedStudents.forEach(s => {
-                let isClassMatch = (fClass === 'all' || s.class === fClass);
-                let isStatusMatch = (fStatus === 'all' || s.status === fStatus);
-                let isSearchMatch = true;
-                if (fSearch !== "") {
-                    const nameNoTone = removeVietnameseTones(s.name);
-                    const initials = getInitials(s.name);
-                    if (!nameNoTone.includes(fSearch) && !initials.includes(fSearch)) isSearchMatch = false;
-                }
-
-                if (isClassMatch && isStatusMatch && isSearchMatch) {
-                    count++;
-                    const statusText = s.status === 'present' ? 'Có mặt' : 'Vắng';
-                    const color = s.status === 'present' ? 'green' : 'red';
-                    const lastUpd = s.lastUpdated ? s.lastUpdated : '';
-                    html += `<tr><td style="text-align:center">${count}</td><td style="text-align:center"><b>${s.class}</b></td><td>${s.name}</td><td style="color:${color}; font-weight:bold; text-align:center">${statusText}</td><td style="text-align:center">${lastUpd}</td></tr>`;
-                }
-            });
-            html += `</tbody></table><br><p style="text-align:right">Xác nhận của BTC</p></body></html>`;
-            const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Danh_Sach_${now.getTime()}.xls`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('liveTime').textContent = now.toLocaleTimeString('vi-VN');
-            document.getElementById('liveDate').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
     </script>
 </body>
 </html>
