@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quan Ly Hoi Trai 2026 - THPT So 1 Tran Phu</title>
+    <title>Hoi Trai 2026 - THPT So 1 Tran Phu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background-color: #f4f6f8; display: flex; flex-direction: column; min-height: 95vh; }
         .school-header { text-align: center; margin-bottom: 20px; text-transform: uppercase; }
-        .school-name { font-size: 1.2rem; color: #555; font-weight: bold; margin: 0; }
-        .camp-name { font-size: 2.2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .school-name { font-size: 1.1rem; color: #555; font-weight: bold; margin: 0; }
+        .camp-name { font-size: 2rem; color: #d32f2f; font-weight: 900; margin: 5px 0 10px 0; }
         
         .clock-container { text-align: center; background: #2c3e50; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
-        .time-display { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
+        .time-display { font-size: 1.4rem; font-weight: bold; font-family: monospace; }
 
         .mode-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .btn-mode { padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #e0e0e0; }
-        .active-user { background-color: #3498db ! deprivation; color: white; }
+        .btn-mode { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; background: #e0e0e0; }
         .active-admin { background-color: #e74c3c !important; color: white; }
 
         .filter-panel { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #d32f2f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
@@ -34,7 +33,7 @@
         .table-container { overflow-x: auto; background: white; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #d32f2f; color: white; }
+        th { background-color: #d32f2f; color: white; white-space: nowrap; }
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
         .bg-present { background: #d1fae5; color: #065f46; }
         .bg-absent { background: #fee2e2; color: #991b1b; }
@@ -56,14 +55,14 @@
     </div>
 
     <div class="mode-container">
-        <button id="btnGuest" class="btn-mode active-user">👀 Che do Khach</button>
+        <button id="btnGuest" class="btn-mode" style="background: #3498db; color: white;">👀 Che do Khach</button>
         <button id="btnAdmin" class="btn-mode">🛡️ Dang nhap Quan ly</button>
     </div>
 
     <div class="filter-panel">
-        <input type="text" id="searchInput" placeholder="Tim ten, nva...">
+        <input type="text" id="searchInput" placeholder="Tim ten hoac lop...">
         <select id="filterClass">
-            <option value="all">-- Tat ca lop --</option>
+            <option value="all">-- Loc theo lop --</option>
         </select>
         
         <div id="adminTools" class="admin-controls">
@@ -77,7 +76,7 @@
     </div>
 
     <div class="stats">
-        <div style="text-align:center">TONG<span id="statTotal" class="stat-number" style="color:#f1c40f">0</span></div>
+        <div style="text-align:center">TONG HIEN THI<span id="statTotal" class="stat-number" style="color:#f1c40f">0</span></div>
         <div style="text-align:center">CO MAT<span id="statPresent" class="stat-number" style="color:#2ecc71">0</span></div>
         <div style="text-align:center">VANG<span id="statAbsent" class="stat-number" style="color:#e74c3c">0</span></div>
     </div>
@@ -100,15 +99,12 @@
         </table>
     </div>
 
-    <div class="footer">
-        Thiet ke boi: <strong>Tran Hong Dan</strong> | 2026
-    </div>
+    <div class="footer">Phat trien: <strong>Tran Hong Dan</strong> | 2026</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 1. CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDEnDE2pOyfKZYUPCSXgaHaR2b9h_AjAe8",
             authDomain: "hoitrai2026.firebaseapp.com",
@@ -122,14 +118,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 2. BIEN TRANG THAI
         let students = [];
         let accounts = {};
         let role = "guest"; 
         let myClass = "";
-        let impType = ""; // 'hs' hoac 'acc'
+        let impType = "";
 
-        // 3. LAY DU LIEU TU SERVER
+        // 1. Lay du lieu tu Firebase
         onValue(ref(db, 'students'), (snap) => {
             students = snap.val() ? Object.values(snap.val()) : [];
             updateFilterClass();
@@ -140,42 +135,57 @@
             accounts = snap.val() || {};
         });
 
-        // 4. XU LY DANG NHAP
+        // 2. Logic Dang nhap theo yeu cau moi
         document.getElementById('btnAdmin').addEventListener('click', () => {
             if (role === "guest") {
-                const pass = prompt("Nhap mat khau quan ly:");
+                const pass = prompt("Nhap mat khau (Vd: 10a012026 hoac cong8888):");
                 if (!pass) return;
 
+                const input = pass.trim().toLowerCase();
                 let found = false;
-                if (pass === "123") { role = "admin"; found = true; } 
+
+                // Admin du phong cho lan dau setup
+                if (input === "admin123") { role = "admin"; found = true; } 
                 else {
                     for (let k in accounts) {
-                        if (accounts[k].password === pass) {
-                            role = accounts[k].role;
-                            myClass = accounts[k].targetClass || "";
+                        const acc = accounts[k];
+                        let validPass = "";
+                        
+                        if (acc.role === "class_manager") {
+                            // Mat khau = ten lop (thuong) + ma 4 so
+                            validPass = acc.targetClass.toLowerCase() + acc.pin;
+                        } else if (acc.role === "gate") {
+                            // Mat khau = cong + ma 4 so
+                            validPass = "cong" + acc.pin;
+                        }
+
+                        if (input === validPass) {
+                            role = acc.role;
+                            myClass = acc.targetClass || "";
                             found = true; break;
                         }
                     }
                 }
 
                 if (found) {
-                    alert("Dang nhap thanh cong!");
-                    setUIMode(true);
-                } else alert("Sai mat khau!");
+                    alert("✅ Dang nhap thanh cong!");
+                    setUIMode();
+                } else alert("❌ Sai mat khau!");
             } else {
                 if (confirm("Dang xuat?")) location.reload();
             }
         });
 
-        function setUIMode(isAdmin) {
-            document.getElementById('btnAdmin').innerHTML = role.toUpperCase() + (myClass ? " " + myClass : "");
-            document.getElementById('btnAdmin').classList.add('active-admin');
+        function setUIMode() {
+            const btn = document.getElementById('btnAdmin');
+            btn.innerHTML = role.toUpperCase() + (myClass ? " " + myClass : "");
+            btn.classList.add('active-admin');
             document.getElementById('colAction').classList.remove('hidden');
             if (role === "admin") document.getElementById('adminTools').style.display = "flex";
             renderTable();
         }
 
-        // 5. XU LY EXCEL
+        // 3. Import Excel
         const fileInp = document.getElementById('fileInput');
         document.getElementById('btnImpHS').addEventListener('click', () => { impType = "hs"; fileInp.click(); });
         document.getElementById('btnImpAcc').addEventListener('click', () => { impType = "acc"; fileInp.click(); });
@@ -187,7 +197,6 @@
                 const data = new Uint8Array(ev.target.result);
                 const wb = XLSX.read(data, { type: 'array' });
                 const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                
                 const updates = {};
                 if (impType === "hs") {
                     json.forEach((r, i) => {
@@ -196,62 +205,54 @@
                     });
                 } else {
                     json.forEach((r, i) => {
-                        updates['accounts/acc' + i] = { displayName: r.Ten, password: String(r.Pass), role: r.Quyen, targetClass: String(r.Lop_Target || "") };
+                        updates['accounts/acc' + i] = { pin: String(r.Ma_4_Ky_Tu), role: r.Quyen, targetClass: String(r.Lop_Target || "") };
                     });
                 }
-                update(ref(db), updates).then(() => { alert("Nhap du lieu thanh cong!"); fileInp.value = ""; });
+                update(ref(db), updates).then(() => { alert("Thanh cong!"); fileInp.value = ""; });
             };
             reader.readAsArrayBuffer(file);
         });
 
+        // 4. Tai file mau Excel
         document.getElementById('btnTemplate').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
-            const ws1 = XLSX.utils.json_to_sheet([{ STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A1", Trang_Thai: "present" }]);
+            const ws1 = XLSX.utils.json_to_sheet([{ STT: 1, Ho_Ten: "Nguyen Van An", Lop: "10A01", Trang_Thai: "present" }]);
             XLSX.utils.book_append_sheet(wb, ws1, "HocSinh");
-            const ws2 = XLSX.utils.json_to_sheet([{ Ten: "GVCN 10A1", Pass: "lop10a1", Quyen: "class_manager", Lop_Target: "10A1" }, { Ten: "Truc Cong", Pass: "cong2026", Quyen: "gate", Lop_Target: "" }]);
+            const ws2 = XLSX.utils.json_to_sheet([
+                { Ma_4_Ky_Tu: "2026", Quyen: "class_manager", Lop_Target: "10A01" },
+                { Ma_4_Ky_Tu: "8888", Quyen: "gate", Lop_Target: "" }
+            ]);
             XLSX.utils.book_append_sheet(wb, ws2, "TaiKhoan");
-            XLSX.writeFile(wb, "Mau_Hoi_Trai_2026.xlsx");
+            XLSX.writeFile(wb, "Mau_Data_HoiTrai.xlsx");
         });
 
-        // 6. HIEN THI BANG
+        // 5. Hien thi bang & Loc
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
             const fClass = document.getElementById('filterClass').value;
-            
             tbody.innerHTML = "";
             let sTotal = 0, sPre = 0, sAbs = 0;
 
             students.sort((a,b) => a.class.localeCompare(b.class)).forEach((s, idx) => {
                 const matchClass = (fClass === "all" || s.class === fClass);
                 const matchSearch = s.name.toLowerCase().includes(search) || s.class.toLowerCase().includes(search);
-
+                
                 if (matchClass && matchSearch) {
-                    sTotal++;
-                    s.status === "present" ? sPre++ : sAbs++;
-
+                    sTotal++; s.status === "present" ? sPre++ : sAbs++;
                     const canEdit = (role === "admin" || role === "gate" || (role === "class_manager" && myClass === s.class));
-                    const btn = canEdit ? `<button onclick="window.doiTrangThai(${s.id}, '${s.status}')" style="cursor:pointer">Doi</button>` : "-";
-
+                    const btn = canEdit ? `<button onclick="window.doiSt(${s.id}, '${s.status}')">Doi</button>` : "-";
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${idx + 1}</td>
-                        <td><b>${s.class}</b></td>
-                        <td>${s.name}</td>
-                        <td><span class="badge ${s.status === 'present' ? 'bg-present' : 'bg-absent'}">${s.status.toUpperCase()}</span></td>
-                        <td style="font-size:0.8rem; color:gray">${s.lastUpdate || '-'}</td>
-                        <td class="${role === 'guest' ? 'hidden' : ''}">${btn}</td>
-                    `;
+                    tr.innerHTML = `<td>${idx+1}</td><td><b>${s.class}</b></td><td>${s.name}</td><td><span class="badge ${s.status === 'present' ? 'bg-present' : 'bg-absent'}">${s.status.toUpperCase()}</span></td><td>${s.lastUpdate || '-'}</td><td class="${role === 'guest' ? 'hidden' : ''}">${btn}</td>`;
                     tbody.appendChild(tr);
                 }
             });
-
             document.getElementById('statTotal').innerText = sTotal;
             document.getElementById('statPresent').innerText = sPre;
             document.getElementById('statAbsent').innerText = sAbs;
         }
 
-        window.doiTrangThai = (id, current) => {
+        window.doiSt = (id, current) => {
             const newSt = current === "present" ? "absent" : "present";
             const now = new Date();
             const time = `${now.getHours()}:${now.getMinutes()} - ${now.getDate()}/${now.getMonth()+1}`;
@@ -262,25 +263,18 @@
             const select = document.getElementById('filterClass');
             const classes = [...new Set(students.map(s => s.class))].sort();
             if (select.options.length <= 1) {
-                classes.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c; opt.innerText = c;
-                    select.appendChild(opt);
-                });
+                classes.forEach(c => { const opt = document.createElement('option'); opt.value = opt.innerText = c; select.appendChild(opt); });
             }
         }
 
-        // Su kien loc
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterClass').addEventListener('change', renderTable);
-
-        // Dong ho
+        
         setInterval(() => {
             const n = new Date();
             document.getElementById('liveTime').innerText = n.toLocaleTimeString('vi-VN');
             document.getElementById('liveDate').innerText = n.toLocaleDateString('vi-VN', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
-
     </script>
 </body>
 </html>
